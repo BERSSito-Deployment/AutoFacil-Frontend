@@ -5,11 +5,7 @@ import { Cargando } from "../componentes/Cargando";
 import { Mensaje } from "../componentes/Mensaje";
 import { ResultadosSimulacion } from "../componentes/ResultadosSimulacion";
 import { mensajeError } from "../api/cliente";
-import {
-  archivarSimulacion,
-  obtenerSimulacion,
-  recalcularSimulacion,
-} from "../api/servicios";
+import { archivarSimulacion, obtenerSimulacion, recalcularSimulacion } from "../api/servicios";
 import type { Simulacion } from "../tipos";
 import {
   ETIQUETA_MONEDA,
@@ -18,12 +14,6 @@ import {
   formatoMoneda,
   formatoPorcentaje,
 } from "../utilidades/formato";
-
-const ETIQUETA_GRACIA: Record<string, string> = {
-  NINGUNA: "Sin gracia",
-  TOTAL: "Gracia total",
-  PARCIAL: "Gracia parcial",
-};
 
 // Muestra un par etiqueta/valor dentro de la cuadricula de parametros.
 function Dato({ etiqueta, valor }: { etiqueta: string; valor: string }) {
@@ -81,11 +71,7 @@ export function SimulacionDetalle() {
     if (!id) {
       return;
     }
-    if (
-      !window.confirm(
-        "¿Eliminar esta simulación? Se quitará del historial."
-      )
-    ) {
+    if (!window.confirm("¿Eliminar esta simulación? Se quitará del historial.")) {
       return;
     }
     setError("");
@@ -106,14 +92,45 @@ export function SimulacionDetalle() {
   }
 
   const archivada = simulacion.estado === "ARCHIVADA";
+  const moneda = simulacion.moneda;
+  const gracia =
+    simulacion.meses_gracia_total === 0 && simulacion.meses_gracia_parcial === 0
+      ? "Sin gracia"
+      : `${simulacion.meses_gracia_total} total + ${simulacion.meses_gracia_parcial} parcial`;
+
+  const costosIniciales = [
+    {
+      etiqueta: "Gastos notariales",
+      monto: simulacion.costo_notarial,
+      financiado: simulacion.costo_notarial_financiado,
+    },
+    {
+      etiqueta: "Gastos registrales",
+      monto: simulacion.costo_registral,
+      financiado: simulacion.costo_registral_financiado,
+    },
+    {
+      etiqueta: "Tasación",
+      monto: simulacion.costo_tasacion,
+      financiado: simulacion.costo_tasacion_financiado,
+    },
+    {
+      etiqueta: "Comisión de estudio",
+      monto: simulacion.comision_estudio,
+      financiado: simulacion.comision_estudio_financiado,
+    },
+    {
+      etiqueta: "Comisión de activación",
+      monto: simulacion.comision_activacion,
+      financiado: simulacion.comision_activacion_financiado,
+    },
+  ].filter((costo) => costo.monto > 0);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {etiquetaSimulacion(simulacion.id)}
-          </h1>
+          <h1 className="text-2xl font-bold text-slate-900">{etiquetaSimulacion(simulacion.id)}</h1>
           {simulacion.nombre && (
             <p className="text-sm font-medium text-slate-600">{simulacion.nombre}</p>
           )}
@@ -153,9 +170,7 @@ export function SimulacionDetalle() {
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-slate-400">Inicio del crédito</p>
-          <p className="text-sm font-medium text-slate-700">
-            {formatoFecha(simulacion.fecha_inicio)}
-          </p>
+          <p className="text-sm font-medium text-slate-700">{formatoFecha(simulacion.fecha_inicio)}</p>
         </div>
       </section>
 
@@ -164,32 +179,34 @@ export function SimulacionDetalle() {
           Parámetros de la operación
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          <Dato etiqueta="Moneda" valor={ETIQUETA_MONEDA[simulacion.moneda]} />
-          <Dato
-            etiqueta="Precio del vehículo"
-            valor={formatoMoneda(simulacion.precio_vehiculo, simulacion.moneda)}
-          />
-          {simulacion.moneda === "USD" && simulacion.tipo_cambio_referencial != null && (
-            <Dato
-              etiqueta="Tipo de cambio ref."
-              valor={simulacion.tipo_cambio_referencial.toFixed(4)}
-            />
+          <Dato etiqueta="Moneda" valor={ETIQUETA_MONEDA[moneda]} />
+          <Dato etiqueta="Precio del vehículo" valor={formatoMoneda(simulacion.precio_vehiculo, moneda)} />
+          {moneda === "USD" && simulacion.tipo_cambio_referencial != null && (
+            <Dato etiqueta="Tipo de cambio ref." valor={simulacion.tipo_cambio_referencial.toFixed(4)} />
           )}
           <Dato
+            etiqueta="Plan"
+            valor={`${simulacion.plan === "PLAN_24" ? "Plan 24" : "Plan 36"} (${simulacion.numero_cuotas} cuotas)`}
+          />
+          <Dato
             etiqueta="Cuota inicial"
-            valor={`${formatoMoneda(simulacion.cuota_inicial, simulacion.moneda)} (${formatoPorcentaje(
+            valor={`${formatoMoneda(simulacion.cuota_inicial, moneda)} (${formatoPorcentaje(
               simulacion.porcentaje_cuota_inicial,
               2
             )})`}
           />
           <Dato
-            etiqueta="Cuota balón (final)"
-            valor={`${formatoMoneda(simulacion.cuota_final, simulacion.moneda)} (${formatoPorcentaje(
+            etiqueta="Cuota final (cuotón)"
+            valor={`${formatoMoneda(simulacion.cuota_final, moneda)} (${formatoPorcentaje(
               simulacion.porcentaje_cuota_final,
               2
             )})`}
           />
-          <Dato etiqueta="Plazo" valor={`${simulacion.plazo_meses} meses`} />
+          <Dato etiqueta="Monto del préstamo" valor={formatoMoneda(simulacion.monto_prestamo, moneda)} />
+          <Dato
+            etiqueta="Saldo financiado"
+            valor={formatoMoneda(simulacion.saldo_financiado, moneda)}
+          />
           <Dato
             etiqueta="Tasa ingresada"
             valor={`${simulacion.tipo_tasa === "EFECTIVA" ? "TEA" : "TNA"} ${formatoPorcentaje(
@@ -198,97 +215,44 @@ export function SimulacionDetalle() {
             )}`}
           />
           {simulacion.capitalizacion && (
-            <Dato etiqueta="Capitalización" valor={simulacion.capitalizacion} />
+            <Dato
+              etiqueta="Capitalización"
+              valor={simulacion.capitalizacion === "DIARIA" ? "Diaria" : "Mensual"}
+            />
           )}
           <Dato etiqueta="TEA equivalente" valor={formatoPorcentaje(simulacion.tea_equivalente)} />
           <Dato etiqueta="TEM" valor={formatoPorcentaje(simulacion.tem)} />
-          <Dato etiqueta="Tasa de interés" valor="Fija" />
-          <Dato
-            etiqueta="Gracia"
-            valor={
-              simulacion.tipo_gracia === "NINGUNA"
-                ? ETIQUETA_GRACIA[simulacion.tipo_gracia]
-                : `${ETIQUETA_GRACIA[simulacion.tipo_gracia]} (${simulacion.meses_gracia} meses)`
-            }
-          />
+          <Dato etiqueta="Gracia" valor={gracia} />
           <Dato etiqueta="COK anual" valor={formatoPorcentaje(simulacion.cok_anual)} />
+          <Dato etiqueta="COK mensual" valor={formatoPorcentaje(simulacion.cok_mensual)} />
           <Dato
-            etiqueta="Tasa descuento VAN"
-            valor={formatoPorcentaje(simulacion.tasa_descuento_van)}
+            etiqueta="Seguro desgravamen (mensual)"
+            valor={formatoPorcentaje(simulacion.seguro_desgravamen_mensual)}
           />
           <Dato
-            etiqueta="Desgravamen anual"
-            valor={
-              simulacion.desgravamen_consentido
-                ? formatoPorcentaje(simulacion.seguro_desgravamen_anual)
-                : "No contratado"
-            }
+            etiqueta="Seguro riesgo (anual)"
+            valor={formatoPorcentaje(simulacion.seguro_riesgo_anual)}
           />
+          <Dato etiqueta="GPS (por cuota)" valor={formatoMoneda(simulacion.gps_periodico, moneda)} />
+          <Dato etiqueta="Portes (por cuota)" valor={formatoMoneda(simulacion.portes_periodico, moneda)} />
           <Dato
-            etiqueta="Seguro vehicular (mes)"
-            valor={formatoMoneda(simulacion.seguro_vehicular_mensual, simulacion.moneda)}
+            etiqueta="Gastos adm. (por cuota)"
+            valor={formatoMoneda(simulacion.gastos_adm_periodico, moneda)}
           />
-          <Dato
-            etiqueta="GPS instalación (al desembolso)"
-            valor={formatoMoneda(simulacion.gps_instalacion, simulacion.moneda)}
-          />
-          <Dato
-            etiqueta="GPS mantenimiento (mes)"
-            valor={formatoMoneda(simulacion.gps_mantenimiento_mensual, simulacion.moneda)}
-          />
-          <Dato
-            etiqueta="GPS reposición (referencial)"
-            valor={formatoMoneda(simulacion.gps_reposicion, simulacion.moneda)}
-          />
-          <Dato
-            etiqueta="Gastos iniciales financiados"
-            valor={formatoMoneda(simulacion.gastos_iniciales, simulacion.moneda)}
-          />
-          {simulacion.tasa_moratoria_anual > 0 && (
-            <Dato
-              etiqueta="Tasa moratoria (nominal anual)"
-              valor={formatoPorcentaje(simulacion.tasa_moratoria_anual)}
-            />
-          )}
         </div>
-        {(simulacion.gastos_notariales > 0 ||
-          simulacion.gastos_registrales > 0 ||
-          simulacion.tasacion > 0) && (
+        {costosIniciales.length > 0 && (
           <div className="mt-4 border-t border-slate-100 pt-4">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Desglose de gastos financiados
+              Costos / gastos iniciales
             </p>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              <Dato
-                etiqueta="Gastos notariales"
-                valor={formatoMoneda(simulacion.gastos_notariales, simulacion.moneda)}
-              />
-              <Dato
-                etiqueta="Gastos registrales"
-                valor={formatoMoneda(simulacion.gastos_registrales, simulacion.moneda)}
-              />
-              <Dato
-                etiqueta="Tasación"
-                valor={formatoMoneda(simulacion.tasacion, simulacion.moneda)}
-              />
-            </div>
-          </div>
-        )}
-        {(simulacion.aseguradora || simulacion.numero_poliza || simulacion.coberturas) && (
-          <div className="mt-4 border-t border-slate-100 pt-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Seguro
-            </p>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              {simulacion.aseguradora && (
-                <Dato etiqueta="Aseguradora" valor={simulacion.aseguradora} />
-              )}
-              {simulacion.numero_poliza && (
-                <Dato etiqueta="Póliza" valor={simulacion.numero_poliza} />
-              )}
-              {simulacion.coberturas && (
-                <Dato etiqueta="Coberturas" valor={simulacion.coberturas} />
-              )}
+              {costosIniciales.map((costo) => (
+                <Dato
+                  key={costo.etiqueta}
+                  etiqueta={`${costo.etiqueta} (${costo.financiado ? "financiado" : "al contado"})`}
+                  valor={formatoMoneda(costo.monto, moneda)}
+                />
+              ))}
             </div>
           </div>
         )}
@@ -297,12 +261,7 @@ export function SimulacionDetalle() {
       <ResultadosSimulacion
         indicadores={simulacion}
         cronograma={simulacion.cronograma}
-        codigo={simulacion.codigo}
-        tipoCambio={
-          simulacion.moneda === "USD"
-            ? simulacion.tipo_cambio_referencial ?? undefined
-            : undefined
-        }
+        tipoCambio={moneda === "USD" ? simulacion.tipo_cambio_referencial ?? undefined : undefined}
       />
 
       <button type="button" className="boton-secundario" onClick={() => navegar("/simulaciones")}>

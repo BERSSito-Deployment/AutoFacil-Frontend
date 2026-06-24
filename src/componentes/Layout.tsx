@@ -127,7 +127,7 @@ export function Layout() {
 
         {/* Unica zona con scroll: el contenido de la pestaña seleccionada. */}
         <main className="flex-1 overflow-y-auto px-6 py-8">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-screen-2xl">
             <Outlet />
           </div>
         </main>

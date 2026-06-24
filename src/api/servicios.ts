@@ -3,7 +3,6 @@ import { clienteHttp } from "./cliente";
 import type {
   Cliente,
   ResultadoCalculo,
-  ResumenDashboard,
   Simulacion,
   SimulacionGuardar,
   SimulacionListado,
@@ -162,12 +161,6 @@ export async function recalcularSimulacion(id: number): Promise<Simulacion> {
 // ARCHIVADA. No hay borrado definitivo.
 export async function archivarSimulacion(id: number): Promise<Simulacion> {
   const respuesta = await clienteHttp.delete<Simulacion>(`/simulaciones/${id}`);
-  return respuesta.data;
-}
-
-// --- Indicadores ---
-export async function obtenerResumen(): Promise<ResumenDashboard> {
-  const respuesta = await clienteHttp.get<ResumenDashboard>("/indicadores/resumen");
   return respuesta.data;
 }
 

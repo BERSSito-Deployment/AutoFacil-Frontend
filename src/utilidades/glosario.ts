@@ -1,6 +1,4 @@
-// Glosario de terminos tecnicos financieros usado por el componente AyudaTooltip.
-// Las claves se usan como identificador de busqueda; los textos son la explicacion
-// que ve el usuario, redactada de forma simple y con la ortografia correcta.
+// Glosario de terminos para los tooltips de ayuda.
 
 export const GLOSARIO: Record<string, string> = {
   TEA: "Tasa Efectiva Anual: tasa de interés que ya considera la capitalización de los intereses durante el año.",
@@ -29,13 +27,13 @@ export const GLOSARIO: Record<string, string> = {
   Capitalizacion:
     "Frecuencia con la que los intereses se suman al capital para generar nuevos intereses (diaria, mensual, etc.).",
   GPS:
-    "Dispositivo de rastreo satelital que la entidad suele exigir instalar en el vehículo financiado. La instalación es un cargo único que se cobra al desembolso y el mantenimiento es mensual (va en la cuota); ambos forman parte de la TCEA. La reposición (ante pérdida o reemplazo) es un tarifario referencial: no se cobra al contratar ni afecta la TCEA.",
+    "Costo periódico (mensual) del dispositivo de rastreo satelital que la entidad instala en el vehículo financiado. Se cobra en cada cuota y forma parte de la TCEA.",
   "Cuota balon":
-    "Cuota final del producto Compra Inteligente: una parte del valor del vehículo (su valor futuro) se difiere al final del crédito. Reduce las cuotas mensuales, pero al término del plazo se paga esa cuota balón en un solo desembolso.",
+    "Cuota final (cuotón) del producto Compra Inteligente: una parte del precio (40% en el Plan 36, 50% en el Plan 24) se difiere y se paga en un solo desembolso al final del crédito (periodo N+1). Reduce las cuotas mensuales.",
   "Gastos iniciales":
-    "Gastos del inicio de la operación que se financian (por ejemplo registro de prenda, notariales, registrales y tasación): se suman al monto financiado y se pagan dentro de las cuotas.",
+    "Costos del inicio de la operación (notariales, registrales, tasación, comisiones). Cada uno puede financiarse (se suma al préstamo y se paga en las cuotas) o pagarse al contado.",
   "Seguro vehicular":
-    "Seguro mensual que cubre daños o pérdida del vehículo durante el financiamiento. Se incluye en cada cuota y forma parte de la TCEA.",
+    "Seguro contra todo riesgo, expresado como porcentaje anual del precio del vehículo. Se prorratea por cuota y forma parte de la TCEA.",
   "Tasa nominal":
     "Tasa de interés anual que no incorpora el efecto de la capitalización en su valor.",
   "Tasa efectiva":
@@ -43,7 +41,7 @@ export const GLOSARIO: Record<string, string> = {
   "Cuota inicial":
     "Monto que paga el cliente al inicio; reduce el monto que se financia con el crédito.",
   "Monto financiado":
-    "Importe que efectivamente se presta: precio del vehículo menos la cuota inicial, más los gastos iniciales que se financian.",
+    "Monto del préstamo: precio del vehículo menos la cuota inicial, más los costos iniciales que se financian.",
   "Costo total del credito":
-    "Total que paga el cliente por el crédito: capital financiado más intereses, seguros y GPS. No incluye la cuota inicial.",
+    "Total que paga el cliente en las cuotas mensuales y el cuotón final (incluye capital, intereses, seguros y cargos). No incluye la cuota inicial.",
 };

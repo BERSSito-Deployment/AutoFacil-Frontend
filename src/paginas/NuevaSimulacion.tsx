@@ -1,4 +1,4 @@
-// Pagina para crear (o editar) una simulacion: seleccion, parametros y calculo.
+// Pagina para crear (o editar) una simulacion Compra Inteligente.
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Campo } from "../componentes/Campo";
@@ -20,9 +20,9 @@ import type {
   Cliente,
   Moneda,
   ParametrosSimulacion,
+  Plan,
   ResultadoCalculo,
   TipoCambio,
-  TipoGracia,
   TipoTasa,
   Vehiculo,
 } from "../tipos";
@@ -39,29 +39,29 @@ interface FormularioSimulacion {
   vehiculo_id: number;
   moneda: Moneda;
   tipo_cambio_referencial: number;
+  plan: Plan;
   tipo_tasa: TipoTasa;
   valor_tasa: number;
   capitalizacion: Capitalizacion | "";
-  plazo_meses: number;
   porcentaje_cuota_inicial: number;
-  porcentaje_cuota_final: number;
-  tipo_gracia: TipoGracia;
-  meses_gracia: number;
-  seguro_desgravamen_anual: number;
-  desgravamen_consentido: boolean;
-  seguro_vehicular_mensual: number;
-  gps_instalacion: number;
-  gps_mantenimiento_mensual: number;
-  gps_reposicion: number;
-  gastos_notariales: number;
-  gastos_registrales: number;
-  tasacion: number;
+  meses_gracia_total: number;
+  meses_gracia_parcial: number;
+  costo_notarial: number;
+  costo_notarial_financiado: boolean;
+  costo_registral: number;
+  costo_registral_financiado: boolean;
+  costo_tasacion: number;
+  costo_tasacion_financiado: boolean;
+  comision_estudio: number;
+  comision_estudio_financiado: boolean;
+  comision_activacion: number;
+  comision_activacion_financiado: boolean;
+  gps_periodico: number;
+  portes_periodico: number;
+  gastos_adm_periodico: number;
+  seguro_desgravamen_mensual: number;
+  seguro_riesgo_anual: number;
   cok_anual: number;
-  tasa_descuento_van: number;
-  tasa_moratoria_anual: number;
-  aseguradora: string;
-  numero_poliza: string;
-  coberturas: string;
   actualizar_precio: boolean;
   fecha_inicio: string;
 }
@@ -72,42 +72,37 @@ const VALOR_INICIAL: FormularioSimulacion = {
   vehiculo_id: 0,
   moneda: "PEN",
   tipo_cambio_referencial: 3.75,
-  tipo_tasa: "EFECTIVA",
-  valor_tasa: 14.5,
-  capitalizacion: "",
-  plazo_meses: 48,
+  plan: "PLAN_36",
+  tipo_tasa: "NOMINAL",
+  valor_tasa: 15,
+  capitalizacion: "DIARIA",
   porcentaje_cuota_inicial: 20,
-  porcentaje_cuota_final: 0,
-  tipo_gracia: "NINGUNA",
-  meses_gracia: 0,
-  seguro_desgravamen_anual: 0,
-  desgravamen_consentido: false,
-  seguro_vehicular_mensual: 0,
-  gps_instalacion: 0,
-  gps_mantenimiento_mensual: 0,
-  gps_reposicion: 0,
-  gastos_notariales: 0,
-  gastos_registrales: 0,
-  tasacion: 0,
-  cok_anual: 12,
-  tasa_descuento_van: 12,
-  tasa_moratoria_anual: 0,
-  aseguradora: "",
-  numero_poliza: "",
-  coberturas: "",
+  meses_gracia_total: 0,
+  meses_gracia_parcial: 0,
+  costo_notarial: 0,
+  costo_notarial_financiado: true,
+  costo_registral: 0,
+  costo_registral_financiado: true,
+  costo_tasacion: 0,
+  costo_tasacion_financiado: true,
+  comision_estudio: 0,
+  comision_estudio_financiado: true,
+  comision_activacion: 0,
+  comision_activacion_financiado: true,
+  gps_periodico: 0,
+  portes_periodico: 0,
+  gastos_adm_periodico: 0,
+  seguro_desgravamen_mensual: 0,
+  seguro_riesgo_anual: 0,
+  cok_anual: 20,
   actualizar_precio: false,
   fecha_inicio: "",
 };
 
-const CAPITALIZACIONES: Capitalizacion[] = [
-  "DIARIA",
-  "MENSUAL",
-  "BIMESTRAL",
-  "TRIMESTRAL",
-  "CUATRIMESTRAL",
-  "SEMESTRAL",
-  "ANUAL",
-];
+const CAPITALIZACIONES: Capitalizacion[] = ["DIARIA", "MENSUAL"];
+
+const CUOTAS_POR_PLAN: Record<Plan, number> = { PLAN_24: 24, PLAN_36: 36 };
+const CUOTA_FINAL_POR_PLAN: Record<Plan, number> = { PLAN_24: 50, PLAN_36: 40 };
 
 // Encabezado de paso con un numero en circulo, para guiar el formulario.
 function Paso({ numero, titulo }: { numero: number; titulo: string }) {
@@ -118,6 +113,56 @@ function Paso({ numero, titulo }: { numero: number; titulo: string }) {
       </span>
       <p className="text-sm font-semibold uppercase tracking-wide text-slate-700">{titulo}</p>
     </div>
+  );
+}
+
+// Campo de un costo inicial: monto + modalidad (financiado al credito o al contado).
+function CostoInicialCampo({
+  etiqueta,
+  descripcion,
+  monto,
+  financiado,
+  onMonto,
+  onModalidad,
+}: {
+  etiqueta: string;
+  descripcion: string;
+  monto: number;
+  financiado: boolean;
+  onMonto: (valor: number) => void;
+  onModalidad: (financiado: boolean) => void;
+}) {
+  return (
+    <Campo etiqueta={etiqueta} descripcion={descripcion}>
+      <input
+        className="campo-entrada"
+        type="number"
+        step="0.01"
+        min="0"
+        value={monto}
+        onChange={(evento) => onMonto(Number(evento.target.value))}
+      />
+      <div className="mt-2 inline-flex overflow-hidden rounded-md border border-slate-300 text-xs">
+        <button
+          type="button"
+          className={`px-3 py-1.5 font-medium ${
+            financiado ? "bg-marca-600 text-white" : "bg-white text-slate-600"
+          }`}
+          onClick={() => onModalidad(true)}
+        >
+          Financiado
+        </button>
+        <button
+          type="button"
+          className={`px-3 py-1.5 font-medium ${
+            !financiado ? "bg-marca-600 text-white" : "bg-white text-slate-600"
+          }`}
+          onClick={() => onModalidad(false)}
+        >
+          Al contado
+        </button>
+      </div>
+    </Campo>
   );
 }
 
@@ -136,19 +181,13 @@ export function NuevaSimulacion() {
   const [calculando, setCalculando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
-  // La cuota inicial y la cuota balon pueden ingresarse como % del precio o como monto.
+  // La cuota inicial puede ingresarse como % del precio o como monto.
   const [modoCuotaInicial, setModoCuotaInicial] = useState<"porcentaje" | "monto">("porcentaje");
-  const [modoCuotaFinal, setModoCuotaFinal] = useState<"porcentaje" | "monto">("porcentaje");
-  // Permite incluir o excluir del calculo los seguros y cargos del credito.
-  const [incluirCargos, setIncluirCargos] = useState(true);
   // Tipo de cambio en tiempo real (solo informativo, para creditos en Dolares).
   const [tipoCambio, setTipoCambio] = useState<TipoCambio | null>(null);
 
   // Se ofrecen todos los vehiculos activos del asesor.
-  const vehiculosActivos = useMemo(
-    () => vehiculos.filter((v) => v.activo),
-    [vehiculos]
-  );
+  const vehiculosActivos = useMemo(() => vehiculos.filter((v) => v.activo), [vehiculos]);
 
   useEffect(() => {
     // Al editar se incluyen los vehiculos dados de baja para que la propuesta
@@ -186,44 +225,32 @@ export function NuevaSimulacion() {
           vehiculo_id: simulacion.vehiculo_id,
           moneda: simulacion.moneda,
           tipo_cambio_referencial: simulacion.tipo_cambio_referencial ?? 3.75,
+          plan: simulacion.plan,
           tipo_tasa: simulacion.tipo_tasa,
           valor_tasa: decimalAPorcentaje(simulacion.tasa_ingresada),
           capitalizacion: simulacion.capitalizacion ?? "",
-          plazo_meses: simulacion.plazo_meses,
           porcentaje_cuota_inicial: decimalAPorcentaje(simulacion.porcentaje_cuota_inicial),
-          porcentaje_cuota_final: decimalAPorcentaje(simulacion.porcentaje_cuota_final),
-          tipo_gracia: simulacion.tipo_gracia,
-          meses_gracia: simulacion.meses_gracia,
-          seguro_desgravamen_anual: decimalAPorcentaje(simulacion.seguro_desgravamen_anual),
-          desgravamen_consentido: simulacion.desgravamen_consentido,
-          seguro_vehicular_mensual: simulacion.seguro_vehicular_mensual,
-          gps_instalacion: simulacion.gps_instalacion,
-          gps_mantenimiento_mensual: simulacion.gps_mantenimiento_mensual,
-          gps_reposicion: simulacion.gps_reposicion,
-          gastos_notariales: simulacion.gastos_notariales,
-          gastos_registrales: simulacion.gastos_registrales,
-          tasacion: simulacion.tasacion,
+          meses_gracia_total: simulacion.meses_gracia_total,
+          meses_gracia_parcial: simulacion.meses_gracia_parcial,
+          costo_notarial: simulacion.costo_notarial,
+          costo_notarial_financiado: simulacion.costo_notarial_financiado,
+          costo_registral: simulacion.costo_registral,
+          costo_registral_financiado: simulacion.costo_registral_financiado,
+          costo_tasacion: simulacion.costo_tasacion,
+          costo_tasacion_financiado: simulacion.costo_tasacion_financiado,
+          comision_estudio: simulacion.comision_estudio,
+          comision_estudio_financiado: simulacion.comision_estudio_financiado,
+          comision_activacion: simulacion.comision_activacion,
+          comision_activacion_financiado: simulacion.comision_activacion_financiado,
+          gps_periodico: simulacion.gps_periodico,
+          portes_periodico: simulacion.portes_periodico,
+          gastos_adm_periodico: simulacion.gastos_adm_periodico,
+          seguro_desgravamen_mensual: decimalAPorcentaje(simulacion.seguro_desgravamen_mensual),
+          seguro_riesgo_anual: decimalAPorcentaje(simulacion.seguro_riesgo_anual),
           cok_anual: decimalAPorcentaje(simulacion.cok_anual),
-          tasa_descuento_van: decimalAPorcentaje(
-            simulacion.tasa_descuento_van ?? simulacion.cok_anual
-          ),
-          tasa_moratoria_anual: decimalAPorcentaje(simulacion.tasa_moratoria_anual),
           actualizar_precio: false,
-          aseguradora: simulacion.aseguradora ?? "",
-          numero_poliza: simulacion.numero_poliza ?? "",
-          coberturas: simulacion.coberturas ?? "",
           fecha_inicio: simulacion.fecha_inicio,
         });
-        setIncluirCargos(
-          simulacion.seguro_desgravamen_anual > 0 ||
-            simulacion.seguro_vehicular_mensual > 0 ||
-            simulacion.gps_instalacion > 0 ||
-            simulacion.gps_mantenimiento_mensual > 0 ||
-            simulacion.gps_reposicion > 0 ||
-            simulacion.gastos_notariales > 0 ||
-            simulacion.gastos_registrales > 0 ||
-            simulacion.tasacion > 0
-        );
         setResultado({ ...simulacion, cronograma: simulacion.cronograma });
       })
       .catch((err) => setError(mensajeError(err)));
@@ -237,10 +264,7 @@ export function NuevaSimulacion() {
   // Opciones del desplegable: los vehiculos activos y, al editar, tambien el
   // vehiculo de la simulacion aunque haya sido dado de baja.
   const vehiculosOpciones = useMemo(() => {
-    if (
-      vehiculoSeleccionado &&
-      !vehiculosActivos.some((v) => v.id === vehiculoSeleccionado.id)
-    ) {
+    if (vehiculoSeleccionado && !vehiculosActivos.some((v) => v.id === vehiculoSeleccionado.id)) {
       return [vehiculoSeleccionado, ...vehiculosActivos];
     }
     return vehiculosActivos;
@@ -263,7 +287,9 @@ export function NuevaSimulacion() {
           : 0
         : precioVehiculo * tipoCambioValor;
   const montoCuotaInicial = (precioCredito * datos.porcentaje_cuota_inicial) / 100;
-  const montoCuotaFinal = (precioCredito * datos.porcentaje_cuota_final) / 100;
+  const numeroCuotas = CUOTAS_POR_PLAN[datos.plan];
+  const porcentajeCuotaFinal = CUOTA_FINAL_POR_PLAN[datos.plan];
+  const montoCuotaFinal = (precioCredito * porcentajeCuotaFinal) / 100;
   const simboloMoneda = monedaCredito === "USD" ? "US$" : "S/";
 
   useEffect(() => {
@@ -305,12 +331,8 @@ export function NuevaSimulacion() {
     }
   };
 
-  // Cualquier cambio de parametro invalida el resultado calculado previamente:
-  // hay que volver a calcular antes de poder guardar.
-  const actualizar = (
-    campo: keyof FormularioSimulacion,
-    valor: string | number | boolean
-  ) => {
+  // Cualquier cambio de parametro invalida el resultado calculado previamente.
+  const actualizar = (campo: keyof FormularioSimulacion, valor: string | number | boolean) => {
     setDatos((anterior) => ({ ...anterior, [campo]: valor }));
     setResultado(null);
   };
@@ -337,18 +359,6 @@ export function NuevaSimulacion() {
     setResultado(null);
   };
 
-  const cambiarMontoCuotaFinal = (monto: number) => {
-    if (precioCredito <= 0) {
-      return;
-    }
-    const porcentaje = (monto / precioCredito) * 100;
-    setDatos((anterior) => ({
-      ...anterior,
-      porcentaje_cuota_final: Math.round(porcentaje * 1e6) / 1e6,
-    }));
-    setResultado(null);
-  };
-
   const validar = (): string | null => {
     if (!datos.cliente_id) {
       return "Debe seleccionar un cliente.";
@@ -359,14 +369,14 @@ export function NuevaSimulacion() {
     if (datos.tipo_tasa === "NOMINAL" && !datos.capitalizacion) {
       return "Debe indicar la capitalización cuando la tasa es nominal.";
     }
-    if (datos.tipo_gracia !== "NINGUNA" && datos.meses_gracia >= datos.plazo_meses) {
-      return "Los meses de gracia deben ser menores que el plazo total.";
+    if (datos.meses_gracia_total + datos.meses_gracia_parcial >= numeroCuotas) {
+      return "Los meses de gracia deben ser menores que el número de cuotas del plan.";
     }
     if (datos.porcentaje_cuota_inicial > 100) {
       return "La cuota inicial no puede superar el 100% del precio.";
     }
-    if (datos.porcentaje_cuota_inicial + datos.porcentaje_cuota_final >= 100) {
-      return "La cuota inicial y la cuota balón no pueden sumar el 100% del precio o más.";
+    if (datos.porcentaje_cuota_inicial + porcentajeCuotaFinal >= 100) {
+      return "La cuota inicial y la cuota final del plan no pueden sumar el 100% del precio o más.";
     }
     if (requiereTipoCambio && datos.tipo_cambio_referencial <= 0) {
       return "Indica un tipo de cambio válido para simular en una moneda distinta a la del vehículo.";
@@ -383,32 +393,29 @@ export function NuevaSimulacion() {
     // vehiculo, o cuando el credito es en Dolares (equivalencias informativas).
     tipo_cambio_referencial:
       requiereTipoCambio || monedaCredito === "USD" ? datos.tipo_cambio_referencial : null,
+    plan: datos.plan,
+    porcentaje_cuota_inicial: porcentajeADecimal(datos.porcentaje_cuota_inicial),
     tipo_tasa: datos.tipo_tasa,
     valor_tasa: porcentajeADecimal(datos.valor_tasa),
     capitalizacion: datos.tipo_tasa === "NOMINAL" ? (datos.capitalizacion as Capitalizacion) : null,
-    plazo_meses: datos.plazo_meses,
-    porcentaje_cuota_inicial: porcentajeADecimal(datos.porcentaje_cuota_inicial),
-    porcentaje_cuota_final: porcentajeADecimal(datos.porcentaje_cuota_final),
-    tipo_gracia: datos.tipo_gracia,
-    meses_gracia: datos.tipo_gracia === "NINGUNA" ? 0 : datos.meses_gracia,
-    // Si los seguros y cargos estan desactivados, se envian en cero.
-    seguro_desgravamen_anual: incluirCargos
-      ? porcentajeADecimal(datos.seguro_desgravamen_anual)
-      : 0,
-    desgravamen_consentido: incluirCargos ? datos.desgravamen_consentido : false,
-    seguro_vehicular_mensual: incluirCargos ? datos.seguro_vehicular_mensual : 0,
-    gps_instalacion: incluirCargos ? datos.gps_instalacion : 0,
-    gps_mantenimiento_mensual: incluirCargos ? datos.gps_mantenimiento_mensual : 0,
-    gps_reposicion: incluirCargos ? datos.gps_reposicion : 0,
-    gastos_notariales: incluirCargos ? datos.gastos_notariales : 0,
-    gastos_registrales: incluirCargos ? datos.gastos_registrales : 0,
-    tasacion: incluirCargos ? datos.tasacion : 0,
+    meses_gracia_total: datos.meses_gracia_total,
+    meses_gracia_parcial: datos.meses_gracia_parcial,
+    costo_notarial: datos.costo_notarial,
+    costo_notarial_financiado: datos.costo_notarial_financiado,
+    costo_registral: datos.costo_registral,
+    costo_registral_financiado: datos.costo_registral_financiado,
+    costo_tasacion: datos.costo_tasacion,
+    costo_tasacion_financiado: datos.costo_tasacion_financiado,
+    comision_estudio: datos.comision_estudio,
+    comision_estudio_financiado: datos.comision_estudio_financiado,
+    comision_activacion: datos.comision_activacion,
+    comision_activacion_financiado: datos.comision_activacion_financiado,
+    gps_periodico: datos.gps_periodico,
+    portes_periodico: datos.portes_periodico,
+    gastos_adm_periodico: datos.gastos_adm_periodico,
+    seguro_desgravamen_mensual: porcentajeADecimal(datos.seguro_desgravamen_mensual),
+    seguro_riesgo_anual: porcentajeADecimal(datos.seguro_riesgo_anual),
     cok_anual: porcentajeADecimal(datos.cok_anual),
-    tasa_descuento_van: porcentajeADecimal(datos.tasa_descuento_van),
-    tasa_moratoria_anual: porcentajeADecimal(datos.tasa_moratoria_anual),
-    aseguradora: datos.aseguradora.trim() || null,
-    numero_poliza: datos.numero_poliza.trim() || null,
-    coberturas: datos.coberturas.trim() || null,
     fecha_inicio: datos.fecha_inicio || null,
   });
 
@@ -442,8 +449,6 @@ export function NuevaSimulacion() {
     setGuardando(true);
     try {
       const carga = construirCarga();
-      // Al editar no se cambia el estado de la simulacion (lo conserva el backend).
-      // Solo se actualiza el precio al actual del vehiculo si el asesor lo pidio.
       const simulacion =
         editando && id
           ? await actualizarSimulacion(Number(id), {
@@ -470,10 +475,10 @@ export function NuevaSimulacion() {
           {editando ? "Editar simulación" : "Nueva simulación"}
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Producto Compra Inteligente: elige el cliente y el vehículo, define la cuota inicial, la
-          cuota balón final y los cargos, y pulsa
-          <span className="font-medium text-slate-700"> Ver vista previa</span> para revisar la
-          cuota y la TCEA antes de guardar.
+          Producto Compra Inteligente: elige el cliente y el vehículo, el plan (que define la cuota
+          final), la cuota inicial, la gracia y los cargos, y pulsa
+          <span className="font-medium text-slate-700"> Ver vista previa</span> para revisar la cuota
+          y la TCEA antes de guardar.
         </p>
       </div>
 
@@ -517,7 +522,7 @@ export function NuevaSimulacion() {
               ))}
             </select>
           </Campo>
-          <Campo etiqueta="Nombre de la simulación" descripcion="Etiqueta para reconocer esta simulación (por ejemplo: Compra Inteligente a 48 meses). Es opcional.">
+          <Campo etiqueta="Nombre de la simulación" descripcion="Etiqueta para reconocer esta simulación (por ejemplo: Compra Inteligente Plan 36). Es opcional.">
             <input
               className="campo-entrada"
               value={datos.nombre}
@@ -574,14 +579,28 @@ export function NuevaSimulacion() {
               <option value="USD">Dólares (USD)</option>
             </select>
           </Campo>
+          <Campo
+            etiqueta="Plan de pagos"
+            ayuda="Cuota balon"
+            descripcion="Plan 24: 24 cuotas y cuota final del 50% del precio. Plan 36: 36 cuotas y cuota final del 40%. La cuota final se difiere y se paga al término del crédito."
+          >
+            <select
+              className="campo-entrada"
+              value={datos.plan}
+              onChange={(evento) => actualizar("plan", evento.target.value as Plan)}
+            >
+              <option value="PLAN_36">Plan 36 (36 cuotas, cuota final 40%)</option>
+              <option value="PLAN_24">Plan 24 (24 cuotas, cuota final 50%)</option>
+            </select>
+          </Campo>
           <Campo etiqueta="Tipo de tasa" ayuda="Tasa efectiva">
             <select
               className="campo-entrada"
               value={datos.tipo_tasa}
               onChange={(evento) => actualizar("tipo_tasa", evento.target.value as TipoTasa)}
             >
-              <option value="EFECTIVA">Efectiva anual (TEA)</option>
               <option value="NOMINAL">Nominal anual (TNA)</option>
+              <option value="EFECTIVA">Efectiva anual (TEA)</option>
             </select>
           </Campo>
           <Campo etiqueta="Valor de la tasa (%)" ayuda={datos.tipo_tasa === "EFECTIVA" ? "TEA" : "TNA"}>
@@ -594,7 +613,10 @@ export function NuevaSimulacion() {
               onChange={(evento) => actualizar("valor_tasa", Number(evento.target.value))}
             />
           </Campo>
-          <Campo etiqueta="Capitalización" ayuda="Capitalizacion">
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <Campo etiqueta="Capitalización" ayuda="Capitalizacion" descripcion="Frecuencia de capitalización de la tasa nominal. Solo aplica si la tasa es nominal (TNA).">
             <select
               className="campo-entrada"
               value={datos.capitalizacion}
@@ -606,10 +628,32 @@ export function NuevaSimulacion() {
               <option value="">Seleccione</option>
               {CAPITALIZACIONES.map((capitalizacion) => (
                 <option key={capitalizacion} value={capitalizacion}>
-                  {capitalizacion}
+                  {capitalizacion === "DIARIA" ? "Diaria" : "Mensual"}
                 </option>
               ))}
             </select>
+          </Campo>
+          <Campo etiqueta="Fecha de inicio" descripcion="Fecha de desembolso del crédito. Las cuotas vencen cada 30 días a partir de esta fecha.">
+            <input
+              className="campo-entrada"
+              type="date"
+              value={datos.fecha_inicio}
+              onChange={(evento) => actualizar("fecha_inicio", evento.target.value)}
+            />
+          </Campo>
+          <Campo
+            etiqueta="COK (Costo de Oportunidad) %"
+            ayuda="COK"
+            descripcion="Rendimiento anual que el cliente esperaría de un uso alternativo de su dinero. Se usa para descontar el flujo en el VAN."
+          >
+            <input
+              className="campo-entrada"
+              type="number"
+              step="0.0001"
+              min="0"
+              value={datos.cok_anual}
+              onChange={(evento) => actualizar("cok_anual", Number(evento.target.value))}
+            />
           </Campo>
         </div>
 
@@ -618,8 +662,8 @@ export function NuevaSimulacion() {
             {requiereTipoCambio && (
               <p className="mb-3 text-xs text-slate-600">
                 El vehículo está en {ETIQUETA_MONEDA[monedaVehiculo]} y el crédito en{" "}
-                {ETIQUETA_MONEDA[monedaCredito]}: el precio se convierte con este tipo de cambio,
-                que queda guardado en la simulación.
+                {ETIQUETA_MONEDA[monedaCredito]}: el precio se convierte con este tipo de cambio, que
+                queda guardado en la simulación.
               </p>
             )}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -649,11 +693,7 @@ export function NuevaSimulacion() {
                 ) : (
                   <p className="text-slate-400">Consultando el tipo de cambio...</p>
                 )}
-                <button
-                  type="button"
-                  className="boton-secundario w-fit"
-                  onClick={aplicarTipoCambioEnVivo}
-                >
+                <button type="button" className="boton-secundario w-fit" onClick={aplicarTipoCambioEnVivo}>
                   Actualizar con la tasa de hoy
                 </button>
               </div>
@@ -662,16 +702,6 @@ export function NuevaSimulacion() {
         )}
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <Campo etiqueta="Plazo (meses)" descripcion="Número total de meses del crédito, incluyendo los meses de gracia.">
-            <input
-              className="campo-entrada"
-              type="number"
-              min="1"
-              value={datos.plazo_meses}
-              onChange={(evento) => actualizar("plazo_meses", Number(evento.target.value))}
-            />
-          </Campo>
-
           {/* Cuota inicial: el asesor elige ingresarla como porcentaje o como monto. */}
           <Campo
             etiqueta="Cuota inicial"
@@ -683,9 +713,7 @@ export function NuevaSimulacion() {
                 <button
                   type="button"
                   className={`px-3 py-2 text-sm font-medium ${
-                    modoCuotaInicial === "porcentaje"
-                      ? "bg-marca-600 text-white"
-                      : "bg-white text-slate-600"
+                    modoCuotaInicial === "porcentaje" ? "bg-marca-600 text-white" : "bg-white text-slate-600"
                   }`}
                   onClick={() => setModoCuotaInicial("porcentaje")}
                 >
@@ -694,9 +722,7 @@ export function NuevaSimulacion() {
                 <button
                   type="button"
                   className={`px-3 py-2 text-sm font-medium ${
-                    modoCuotaInicial === "monto"
-                      ? "bg-marca-600 text-white"
-                      : "bg-white text-slate-600"
+                    modoCuotaInicial === "monto" ? "bg-marca-600 text-white" : "bg-white text-slate-600"
                   }`}
                   onClick={() => setModoCuotaInicial("monto")}
                   disabled={precioVehiculo <= 0}
@@ -738,352 +764,214 @@ export function NuevaSimulacion() {
             </p>
           </Campo>
 
-          {/* Cuota balon (Compra Inteligente): valor futuro pagado al final. */}
+          {/* Cuota final: derivada del plan, solo informativa. */}
           <Campo
-            etiqueta="Cuota balón (final)"
-            descripcion="Valor futuro del vehículo que se paga al final del crédito (cuota balón de Compra Inteligente). Reduce las cuotas mensuales. Ingrésalo como porcentaje del precio o como monto."
+            etiqueta="Cuota final (del plan)"
+            ayuda="Cuota balon"
+            descripcion="Parte del precio que se difiere y se paga al final del crédito. La define el plan (40% en Plan 36, 50% en Plan 24)."
           >
-            <div className="flex gap-2">
-              <div className="inline-flex shrink-0 overflow-hidden rounded-md border border-slate-300">
-                <button
-                  type="button"
-                  className={`px-3 py-2 text-sm font-medium ${
-                    modoCuotaFinal === "porcentaje"
-                      ? "bg-marca-600 text-white"
-                      : "bg-white text-slate-600"
-                  }`}
-                  onClick={() => setModoCuotaFinal("porcentaje")}
-                >
-                  %
-                </button>
-                <button
-                  type="button"
-                  className={`px-3 py-2 text-sm font-medium ${
-                    modoCuotaFinal === "monto"
-                      ? "bg-marca-600 text-white"
-                      : "bg-white text-slate-600"
-                  }`}
-                  onClick={() => setModoCuotaFinal("monto")}
-                  disabled={precioVehiculo <= 0}
-                  title={precioVehiculo <= 0 ? "Selecciona un vehículo primero" : undefined}
-                >
-                  {simboloMoneda}
-                </button>
-              </div>
-              {modoCuotaFinal === "porcentaje" ? (
-                <input
-                  className="campo-entrada"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="99"
-                  value={datos.porcentaje_cuota_final}
-                  onChange={(evento) =>
-                    actualizar("porcentaje_cuota_final", Number(evento.target.value))
-                  }
-                />
-              ) : (
-                <input
-                  className="campo-entrada"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max={precioVehiculo}
-                  value={Number(montoCuotaFinal.toFixed(2))}
-                  onChange={(evento) => cambiarMontoCuotaFinal(Number(evento.target.value))}
-                />
+            <div className="campo-entrada flex items-center justify-between bg-slate-50 text-slate-700">
+              <span className="font-semibold">{porcentajeCuotaFinal}%</span>
+              {precioVehiculo > 0 && (
+                <span className="text-xs text-slate-500">
+                  {formatoMoneda(montoCuotaFinal, monedaCredito)}
+                </span>
               )}
             </div>
-            <p className="mt-1 text-xs text-slate-500">
-              {precioVehiculo > 0
-                ? modoCuotaFinal === "porcentaje"
-                  ? `Equivale a ${formatoMoneda(montoCuotaFinal, monedaCredito)}`
-                  : `Equivale al ${datos.porcentaje_cuota_final.toFixed(2)} % del precio`
-                : "Déjalo en 0 para un crédito sin cuota balón."}
-            </p>
+            <p className="mt-1 text-xs text-slate-500">Se paga en el periodo {numeroCuotas + 1}.</p>
           </Campo>
 
           <Campo
-            etiqueta="Período de gracia"
+            etiqueta="Meses de gracia total"
             ayuda="Gracia total"
-            descripcion="Total: no se pagan capital ni intereses (se capitalizan), pero los seguros y cargos sí se cobran. Parcial: se pagan solo los intereses y los cargos; no se amortiza capital."
+            descripcion="Meses iniciales en los que no se paga capital ni intereses (los intereses se capitalizan). Los cargos sí se cobran."
           >
-            <select
-              className="campo-entrada"
-              value={datos.tipo_gracia}
-              onChange={(evento) => actualizar("tipo_gracia", evento.target.value as TipoGracia)}
-            >
-              <option value="NINGUNA">Sin gracia</option>
-              <option value="TOTAL">Gracia total</option>
-              <option value="PARCIAL">Gracia parcial</option>
-            </select>
-          </Campo>
-        </div>
-
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <Campo etiqueta="Meses de gracia" ayuda="Gracia parcial">
             <input
               className="campo-entrada"
               type="number"
               min="0"
-              value={datos.meses_gracia}
-              disabled={datos.tipo_gracia === "NINGUNA"}
-              onChange={(evento) => actualizar("meses_gracia", Number(evento.target.value))}
-            />
-          </Campo>
-          <Campo etiqueta="Fecha de inicio" descripcion="Fecha de desembolso del crédito. Las cuotas vencen cada 30 días a partir de esta fecha.">
-            <input
-              className="campo-entrada"
-              type="date"
-              value={datos.fecha_inicio}
-              onChange={(evento) => actualizar("fecha_inicio", evento.target.value)}
+              value={datos.meses_gracia_total}
+              onChange={(evento) => actualizar("meses_gracia_total", Number(evento.target.value))}
             />
           </Campo>
           <Campo
-            etiqueta="COK (Costo de Oportunidad) %"
-            ayuda="COK"
-            descripcion="Rendimiento mínimo anual que el cliente esperaría de un uso alternativo de su dinero."
+            etiqueta="Meses de gracia parcial"
+            ayuda="Gracia parcial"
+            descripcion="Meses (a continuación de la gracia total) en los que solo se paga el interés; no se amortiza capital."
           >
             <input
               className="campo-entrada"
               type="number"
-              step="0.0001"
               min="0"
-              value={datos.cok_anual}
-              onChange={(evento) => actualizar("cok_anual", Number(evento.target.value))}
-            />
-          </Campo>
-          <Campo
-            etiqueta="Tasa de Descuento VAN (%)"
-            ayuda="VAN"
-            descripcion="Tasa anual con la que se descuenta el flujo para calcular el VAN. Si la dejas igual al COK, el VAN se evalúa al costo de oportunidad."
-          >
-            <input
-              className="campo-entrada"
-              type="number"
-              step="0.0001"
-              min="0"
-              value={datos.tasa_descuento_van}
-              onChange={(evento) => actualizar("tasa_descuento_van", Number(evento.target.value))}
+              value={datos.meses_gracia_parcial}
+              onChange={(evento) => actualizar("meses_gracia_parcial", Number(evento.target.value))}
             />
           </Campo>
         </div>
       </section>
 
       <section className="tarjeta space-y-5 p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Paso numero={3} titulo="Seguros y cargos del crédito" />
-          <button
-            type="button"
-            role="switch"
-            aria-checked={incluirCargos}
-            onClick={() => {
-              setIncluirCargos((v) => !v);
-              setResultado(null);
-            }}
-            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
-              incluirCargos
-                ? "border-marca-200 bg-marca-50 text-marca-700"
-                : "border-slate-200 bg-slate-50 text-slate-500"
-            }`}
-          >
-            <span
-              className={`relative h-4 w-7 rounded-full transition-colors ${
-                incluirCargos ? "bg-marca-600" : "bg-slate-300"
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${
-                  incluirCargos ? "left-3.5" : "left-0.5"
-                }`}
-              />
-            </span>
-            {incluirCargos ? "Cargos incluidos" : "Cargos desactivados"}
-          </button>
-        </div>
-        {!incluirCargos && (
-          <p className="text-xs text-slate-500">
-            Los seguros y cargos están desactivados: la simulación se calcula sin ellos. Actívalos
-            para incluirlos en la cuota y en la TCEA.
-          </p>
-        )}
-        <fieldset disabled={!incluirCargos} className="space-y-5 disabled:opacity-50">
+        <Paso numero={3} titulo="Seguros y costos" />
+
+        {/* Seguros. Son PORCENTAJES, no montos. */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Campo
-            etiqueta="Seguro de desgravamen (%)"
+            etiqueta="Seguro de desgravamen (% mensual)"
             ayuda="Seguro de desgravamen"
-            descripcion="Tasa anual del seguro de desgravamen. Es opcional: solo se cobra si el cliente lo contrató (Res. SBS 890-2025)."
+            descripcion="Tasa mensual del seguro de desgravamen, aplicada sobre el saldo. Va incluida en la cuota. Es un porcentaje, por ejemplo 0.049 (= 0.049%)."
           >
-            <label className="mb-2 flex items-center gap-2 text-sm text-slate-600">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-slate-300 text-marca-600 focus:ring-marca-500"
-                checked={datos.desgravamen_consentido}
-                onChange={(evento) => actualizar("desgravamen_consentido", evento.target.checked)}
-              />
-              El cliente contrató el seguro de desgravamen
-            </label>
             <input
               className="campo-entrada"
               type="number"
               step="0.0001"
               min="0"
-              value={datos.seguro_desgravamen_anual}
-              disabled={!datos.desgravamen_consentido}
+              placeholder="Ej: 0.049"
+              value={datos.seguro_desgravamen_mensual}
               onChange={(evento) =>
-                actualizar("seguro_desgravamen_anual", Number(evento.target.value))
+                actualizar("seguro_desgravamen_mensual", Number(evento.target.value))
               }
             />
+            <p className="mt-1 text-xs text-slate-500">Porcentaje mensual sobre el saldo.</p>
           </Campo>
-          <Campo etiqueta="Seguro vehicular mensual" descripcion="Monto fijo mensual del seguro vehicular. Se incluye en cada cuota y forma parte de la TCEA. Déjalo en 0 si no aplica.">
+          <Campo
+            etiqueta="Seguro contra todo riesgo (% anual)"
+            ayuda="Seguro vehicular"
+            descripcion="Tasa anual del seguro vehicular sobre el precio del vehículo. Es un porcentaje, por ejemplo 0.30 (= 0.30%). Se prorratea por cuota."
+          >
             <input
               className="campo-entrada"
               type="number"
-              step="0.01"
+              step="0.0001"
               min="0"
-              value={datos.seguro_vehicular_mensual}
-              onChange={(evento) =>
-                actualizar("seguro_vehicular_mensual", Number(evento.target.value))
-              }
+              placeholder="Ej: 0.30"
+              value={datos.seguro_riesgo_anual}
+              onChange={(evento) => actualizar("seguro_riesgo_anual", Number(evento.target.value))}
             />
+            <p className="mt-1 text-xs text-slate-500">
+              {precioCredito > 0 && datos.seguro_riesgo_anual > 0
+                ? `≈ ${formatoMoneda(
+                    (datos.seguro_riesgo_anual / 100) * precioCredito / 12,
+                    monedaCredito
+                  )} por cuota`
+                : "Porcentaje anual sobre el precio del vehículo."}
+            </p>
           </Campo>
         </div>
 
-        {/* GPS: instalacion (unica al desembolso), mantenimiento (mensual) y reposicion (referencial). */}
-        <div className="rounded-md border border-slate-200 bg-slate-50/60 p-4">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            GPS (dispositivo de rastreo)
-          </p>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <Campo etiqueta="Instalación (cargo único)" descripcion="Costo único de instalación del GPS. Se cobra al desembolso y forma parte de la TCEA.">
-              <input
-                className="campo-entrada"
-                type="number"
-                step="0.01"
-                min="0"
-                value={datos.gps_instalacion}
-                onChange={(evento) => actualizar("gps_instalacion", Number(evento.target.value))}
-              />
-            </Campo>
-            <Campo etiqueta="Mantenimiento mensual" descripcion="Costo mensual de mantenimiento del GPS. Se incluye en cada cuota y forma parte de la TCEA.">
-              <input
-                className="campo-entrada"
-                type="number"
-                step="0.01"
-                min="0"
-                value={datos.gps_mantenimiento_mensual}
-                onChange={(evento) =>
-                  actualizar("gps_mantenimiento_mensual", Number(evento.target.value))
-                }
-              />
-            </Campo>
-            <Campo etiqueta="Reposición (referencial)" descripcion="Costo de reposición del GPS ante pérdida o reemplazo. Es un tarifario informativo: NO se cobra al contratar ni afecta la TCEA; se muestra solo como referencia.">
-              <input
-                className="campo-entrada"
-                type="number"
-                step="0.01"
-                min="0"
-                value={datos.gps_reposicion}
-                onChange={(evento) => actualizar("gps_reposicion", Number(evento.target.value))}
-              />
-            </Campo>
-          </div>
-        </div>
-
-        {/* Gastos de terceros que se financian (se suman al monto y entran en la TCEA). */}
+        {/* Costos periodicos por cuota. */}
         <div className="rounded-md border border-slate-200 bg-slate-50/60 p-4">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Gastos de terceros (se financian)
+            Costos periódicos (monto por cada cuota)
           </p>
           <p className="mb-3 text-xs text-slate-500">
-            Son opcionales. Se suman al monto financiado y se pagan dentro de las cuotas, por lo que
-            forman parte de la TCEA. Déjalos en 0 si no aplican.
+            Ingresa el monto de <span className="font-medium">una</span> cuota, no el total. Se cobran
+            en cada uno de los {numeroCuotas + 1} periodos.
           </p>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <Campo etiqueta="Gastos notariales" descripcion="Honorarios notariales de la operación.">
+            <Campo etiqueta="GPS (por cuota)" ayuda="GPS" descripcion="Costo mensual del GPS que se cobra en cada cuota. Forma parte de la TCEA.">
               <input
                 className="campo-entrada"
                 type="number"
                 step="0.01"
                 min="0"
-                value={datos.gastos_notariales}
-                onChange={(evento) => actualizar("gastos_notariales", Number(evento.target.value))}
+                placeholder="Ej: 20"
+                value={datos.gps_periodico}
+                onChange={(evento) => actualizar("gps_periodico", Number(evento.target.value))}
               />
+              <p className="mt-1 text-xs text-slate-500">
+                {datos.gps_periodico > 0
+                  ? `× ${numeroCuotas + 1} = ${formatoMoneda(datos.gps_periodico * (numeroCuotas + 1), monedaCredito)} en total`
+                  : "Monto por cada cuota."}
+              </p>
             </Campo>
-            <Campo etiqueta="Gastos registrales" descripcion="Gastos de inscripción en registros públicos (incluye la prenda vehicular).">
+            <Campo etiqueta="Portes (por cuota)" descripcion="Cargo mensual de portes que se cobra en cada cuota.">
               <input
                 className="campo-entrada"
                 type="number"
                 step="0.01"
                 min="0"
-                value={datos.gastos_registrales}
-                onChange={(evento) =>
-                  actualizar("gastos_registrales", Number(evento.target.value))
-                }
+                placeholder="Ej: 3.50"
+                value={datos.portes_periodico}
+                onChange={(evento) => actualizar("portes_periodico", Number(evento.target.value))}
               />
+              <p className="mt-1 text-xs text-slate-500">
+                {datos.portes_periodico > 0
+                  ? `× ${numeroCuotas + 1} = ${formatoMoneda(datos.portes_periodico * (numeroCuotas + 1), monedaCredito)} en total`
+                  : "Monto por cada cuota."}
+              </p>
             </Campo>
-            <Campo etiqueta="Tasación" descripcion="Costo de tasación del vehículo.">
+            <Campo etiqueta="Gastos adm. (por cuota)" descripcion="Cargo mensual de gastos administrativos que se cobra en cada cuota.">
               <input
                 className="campo-entrada"
                 type="number"
                 step="0.01"
                 min="0"
-                value={datos.tasacion}
-                onChange={(evento) => actualizar("tasacion", Number(evento.target.value))}
+                placeholder="Ej: 3.50"
+                value={datos.gastos_adm_periodico}
+                onChange={(evento) => actualizar("gastos_adm_periodico", Number(evento.target.value))}
               />
+              <p className="mt-1 text-xs text-slate-500">
+                {datos.gastos_adm_periodico > 0
+                  ? `× ${numeroCuotas + 1} = ${formatoMoneda(datos.gastos_adm_periodico * (numeroCuotas + 1), monedaCredito)} en total`
+                  : "Monto por cada cuota."}
+              </p>
             </Campo>
           </div>
         </div>
-        </fieldset>
-      </section>
 
-      <section className="tarjeta space-y-5 p-6">
-        <Paso numero={4} titulo="Transparencia para el cliente (opcional)" />
-        <p className="text-sm text-slate-500">
-          Estos datos no alteran el cálculo: se muestran en la hoja resumen de transparencia para el
-          cliente (art. 25 del Reglamento de Transparencia SBS).
-        </p>
-        <p className="text-xs text-slate-500">
-          La tasa de interés del crédito es fija (efectiva o nominal). Durante un período de gracia
-          total no se pagan capital ni intereses (se capitalizan), pero los seguros y cargos sí se
-          cobran cada mes.
-        </p>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <Campo etiqueta="Tasa moratoria anual (%)" descripcion="Tasa de mora nominal anual (no capitalizable) aplicable ante atrasos, según la SBS. Es informativa: no entra en la cuota ni en la TCEA.">
-            <input
-              className="campo-entrada"
-              type="number"
-              step="0.0001"
-              min="0"
-              value={datos.tasa_moratoria_anual}
-              onChange={(evento) => actualizar("tasa_moratoria_anual", Number(evento.target.value))}
+        {/* Costos / gastos iniciales con modalidad. */}
+        <div className="rounded-md border border-slate-200 bg-slate-50/60 p-4">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Costos / gastos iniciales
+          </p>
+          <p className="mb-3 text-xs text-slate-500">
+            Marca cada uno como <span className="font-medium">Financiado</span> (se suma al préstamo y
+            se paga en las cuotas) o <span className="font-medium">Al contado</span> (lo paga el
+            cliente aparte). Déjalos en 0 si no aplican.
+          </p>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <CostoInicialCampo
+              etiqueta="Gastos notariales"
+              descripcion="Honorarios notariales de la operación."
+              monto={datos.costo_notarial}
+              financiado={datos.costo_notarial_financiado}
+              onMonto={(v) => actualizar("costo_notarial", v)}
+              onModalidad={(v) => actualizar("costo_notarial_financiado", v)}
             />
-          </Campo>
-          <Campo etiqueta="Aseguradora" descripcion="Compañía de seguros de la póliza vehicular.">
-            <input
-              className="campo-entrada"
-              value={datos.aseguradora}
-              placeholder="Opcional"
-              onChange={(evento) => actualizar("aseguradora", evento.target.value)}
+            <CostoInicialCampo
+              etiqueta="Gastos registrales"
+              descripcion="Gastos de inscripción en registros públicos (incluye la prenda vehicular)."
+              monto={datos.costo_registral}
+              financiado={datos.costo_registral_financiado}
+              onMonto={(v) => actualizar("costo_registral", v)}
+              onModalidad={(v) => actualizar("costo_registral_financiado", v)}
             />
-          </Campo>
-          <Campo etiqueta="Número de póliza" descripcion="Identificador de la póliza del seguro.">
-            <input
-              className="campo-entrada"
-              value={datos.numero_poliza}
-              placeholder="Opcional"
-              onChange={(evento) => actualizar("numero_poliza", evento.target.value)}
+            <CostoInicialCampo
+              etiqueta="Tasación"
+              descripcion="Costo de tasación del vehículo."
+              monto={datos.costo_tasacion}
+              financiado={datos.costo_tasacion_financiado}
+              onMonto={(v) => actualizar("costo_tasacion", v)}
+              onModalidad={(v) => actualizar("costo_tasacion_financiado", v)}
             />
-          </Campo>
+            <CostoInicialCampo
+              etiqueta="Comisión de estudio"
+              descripcion="Comisión por el estudio y evaluación del crédito."
+              monto={datos.comision_estudio}
+              financiado={datos.comision_estudio_financiado}
+              onMonto={(v) => actualizar("comision_estudio", v)}
+              onModalidad={(v) => actualizar("comision_estudio_financiado", v)}
+            />
+            <CostoInicialCampo
+              etiqueta="Comisión de activación"
+              descripcion="Comisión por la activación del crédito."
+              monto={datos.comision_activacion}
+              financiado={datos.comision_activacion_financiado}
+              onMonto={(v) => actualizar("comision_activacion", v)}
+              onModalidad={(v) => actualizar("comision_activacion_financiado", v)}
+            />
+          </div>
         </div>
-        <Campo etiqueta="Principales coberturas" descripcion="Resumen de las coberturas del seguro para informar al cliente.">
-          <textarea
-            className="campo-entrada min-h-[80px]"
-            value={datos.coberturas}
-            placeholder="Opcional (por ejemplo: todo riesgo, robo, responsabilidad civil)"
-            onChange={(evento) => actualizar("coberturas", evento.target.value)}
-          />
-        </Campo>
       </section>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -1095,12 +983,7 @@ export function NuevaSimulacion() {
         >
           {guardando ? "Guardando..." : editando ? "Guardar cambios" : "Guardar simulación"}
         </button>
-        <button
-          type="button"
-          className="boton-secundario"
-          onClick={calcular}
-          disabled={calculando}
-        >
+        <button type="button" className="boton-secundario" onClick={calcular} disabled={calculando}>
           {calculando ? "Calculando..." : "Ver vista previa"}
         </button>
         <span className="self-center text-sm text-slate-500">

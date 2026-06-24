@@ -72,9 +72,7 @@ export function etiquetaSimulacion(idOCodigo: number | string): string {
   return `Simulación ${numero || idOCodigo}`;
 }
 
-// Fuente de imagen del vehiculo: la URL propia si la tiene; si no, una foto
-// estable por marca (servicio publico LoremFlickr). El "lock" fija la misma
-// imagen para un mismo vehiculo (no cambia entre recargas).
+// Imagen del vehiculo: su URL propia o una foto por marca (LoremFlickr).
 export function imagenVehiculo(vehiculo: {
   url_imagen?: string | null;
   marca: string;
@@ -89,19 +87,3 @@ export function imagenVehiculo(vehiculo: {
   return `https://loremflickr.com/640/400/${marca || "auto"},car/all?lock=${lock}`;
 }
 
-export const ETIQUETA_ESTADO: Record<string, string> = {
-  CALCULADA: "Calculada",
-  ARCHIVADA: "Archivada",
-};
-
-export const CLASE_ESTADO: Record<string, string> = {
-  CALCULADA: "bg-marca-100 text-marca-800",
-  ARCHIVADA: "bg-slate-100 text-slate-600",
-};
-
-export const ETIQUETA_TIPO_PERIODO: Record<string, string> = {
-  GRACIA_TOTAL: "Gracia total",
-  GRACIA_PARCIAL: "Gracia parcial",
-  CUOTA_ORDINARIA: "Cuota ordinaria",
-  CUOTA_FINAL: "Cuota con balón",
-};

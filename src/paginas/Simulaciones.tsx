@@ -88,7 +88,7 @@ export function Simulaciones() {
                 <th>Simulación</th>
                 <th>Cliente</th>
                 <th>Vehículo</th>
-                <th className="text-right">Monto financiado</th>
+                <th className="text-right">Monto del préstamo</th>
                 <th className="text-right">Cuota mensual</th>
                 <th className="text-right">TCEA</th>
                 <th>Fecha</th>
@@ -112,7 +112,7 @@ export function Simulaciones() {
                   <td>{simulacion.cliente_nombre ?? "-"}</td>
                   <td>{simulacion.vehiculo_descripcion ?? "-"}</td>
                   <td className="text-right">
-                    {formatoMoneda(simulacion.monto_financiado, simulacion.moneda)}
+                    {formatoMoneda(simulacion.monto_prestamo, simulacion.moneda)}
                   </td>
                   <td className="text-right">
                     {formatoMoneda(simulacion.cuota_mensual, simulacion.moneda)}
