@@ -3,9 +3,7 @@ import { clienteHttp } from "./cliente";
 import type {
   Cliente,
   ResultadoCalculo,
-  ResumenDashboard,
   Simulacion,
-  SimulacionClienteVista,
   SimulacionGuardar,
   SimulacionListado,
   ParametrosSimulacion,
@@ -159,24 +157,10 @@ export async function recalcularSimulacion(id: number): Promise<Simulacion> {
   return respuesta.data;
 }
 
-export async function cambiarEstadoSimulacion(
-  id: number,
-  estado: EstadoSimulacion
-): Promise<Simulacion> {
-  const respuesta = await clienteHttp.post<Simulacion>(`/simulaciones/${id}/estado`, { estado });
-  return respuesta.data;
-}
-
 // Archivado logico: conserva el registro y su historial, pero la marca como
-// ARCHIVADA y deja de ser compartible. No hay borrado definitivo.
+// ARCHIVADA. No hay borrado definitivo.
 export async function archivarSimulacion(id: number): Promise<Simulacion> {
   const respuesta = await clienteHttp.delete<Simulacion>(`/simulaciones/${id}`);
-  return respuesta.data;
-}
-
-// --- Indicadores ---
-export async function obtenerResumen(): Promise<ResumenDashboard> {
-  const respuesta = await clienteHttp.get<ResumenDashboard>("/indicadores/resumen");
   return respuesta.data;
 }
 
@@ -188,15 +172,5 @@ export async function obtenerTipoCambio(
   const respuesta = await clienteHttp.get<TipoCambio>("/tipo-cambio", {
     params: { base, destino },
   });
-  return respuesta.data;
-}
-
-// --- Vista publica del cliente (no requiere autenticacion) ---
-export async function obtenerSimulacionCompartida(
-  token: string
-): Promise<SimulacionClienteVista> {
-  const respuesta = await clienteHttp.get<SimulacionClienteVista>(
-    `/publico/simulaciones/${token}`
-  );
   return respuesta.data;
 }

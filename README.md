@@ -1,9 +1,6 @@
-# AutoFacil - Frontend (React + Vite + TypeScript)
+# AutoFacil - Frontend
 
-Interfaz de escritorio para simular el credito vehicular y gestionar clientes y
-el catalogo. Requiere el backend en http://localhost:8000.
-
-## Puesta en marcha
+## Correr código
 
 ```cmd
 cd Frontend
@@ -25,9 +22,8 @@ npm run preview  :: sirve la version compilada
 
 `VITE_API_URL` define la URL del backend (por defecto http://localhost:8000).
 
-## Cuentas de prueba
+## Cuenta de prueba
 
 | Usuario | Contrasena |
 |---------|------------|
 | demo    | Demo1234   |
-| maria   | Maria1234  |

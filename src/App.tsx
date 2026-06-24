@@ -1,10 +1,9 @@
-// Definicion de rutas: publicas (login, registro, vista compartible) y privadas.
+// Definicion de rutas: publicas (login, registro) y privadas.
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./componentes/Layout";
 import { RutaProtegida } from "./componentes/RutaProtegida";
 import { Login } from "./paginas/Login";
 import { Registro } from "./paginas/Registro";
-import { VistaCliente } from "./paginas/VistaCliente";
 import { Dashboard } from "./paginas/Dashboard";
 import { Clientes } from "./paginas/Clientes";
 import { ClienteFormulario } from "./paginas/ClienteFormulario";
@@ -19,7 +18,6 @@ export function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
-      <Route path="/compartir/:token" element={<VistaCliente />} />
       <Route
         element={
           <RutaProtegida>

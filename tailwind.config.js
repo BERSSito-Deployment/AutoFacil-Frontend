@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Azul teal (verde azulado) institucional: color principal de AutoFacil.
+        // Color principal.
         marca: {
           50: "#ecf7f4",
           100: "#cfeae3",
@@ -18,7 +18,7 @@ export default {
           900: "#0c463d",
           950: "#042a24",
         },
-        // Acento calido para detalles y llamados puntuales.
+        // Acento.
         acento: {
           50: "#fff7ed",
           100: "#ffedd5",
@@ -26,7 +26,7 @@ export default {
           600: "#d97706",
           700: "#b45309",
         },
-        // Verde de estado positivo / disponible.
+        // Estado positivo.
         exito: {
           50: "#ecfdf5",
           100: "#d1fae5",
@@ -35,8 +35,23 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['"IBM Plex Sans"', "Segoe UI", "system-ui", "sans-serif"],
-        display: ['"Fraunces"', "Georgia", "serif"],
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"SF Pro Text"',
+          '"SF Pro Display"',
+          '"Segoe UI"',
+          "system-ui",
+          "sans-serif",
+        ],
+        display: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"SF Pro Display"',
+          '"Segoe UI"',
+          "system-ui",
+          "sans-serif",
+        ],
       },
       boxShadow: {
         suave: "0 1px 2px rgba(2, 42, 36, 0.06)",
