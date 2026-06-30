@@ -59,10 +59,10 @@ export function Registro() {
         <div className="mb-6 flex flex-col items-center text-center">
           <img src="/logo.png" alt="AutoFácil" className="h-14 w-14 object-contain" />
           <h1 className="mt-2 font-display text-2xl font-bold text-slate-900">AutoFácil</h1>
-          <p className="text-sm text-slate-500">Crea tu cuenta de asesor</p>
+          <p className="text-sm text-slate-500">Crea tu cuenta para simular tu crédito vehicular</p>
         </div>
 
-        <div className="tarjeta p-6 shadow-realce">
+        <div className="tarjeta p-6">
           <form onSubmit={enviar} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>

@@ -37,7 +37,7 @@ function Egreso({ valor }: { valor: number }) {
 
 function Indicador({ titulo, valor, ayuda }: { titulo: string; valor: string; ayuda?: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div className="border border-slate-200 bg-white p-4">
       <p className="flex items-center gap-1 text-xs text-slate-500">
         {titulo}
         {ayuda && <AyudaTooltip termino={ayuda} />}
@@ -55,9 +55,9 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
 
   return (
     <div className="space-y-6">
-      {/* Hero: los indicadores mas importantes para el cliente. */}
+      {/* Los tres numeros mas importantes. */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border-l-4 border-marca-600 bg-marca-50/50 p-5 shadow-suave">
+        <div className="border border-slate-200 bg-white p-5">
           <p className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
             Cuota mensual <AyudaTooltip termino="Sistema frances" />
           </p>
@@ -67,8 +67,8 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
           {equivalente(indicadores.cuota_mensual) && (
             <p className="text-xs text-slate-400">{equivalente(indicadores.cuota_mensual)}</p>
           )}
-          <div className="mt-4 rounded-lg border border-marca-200 bg-white/85 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-marca-700">
+          <div className="mt-4 border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Cuota final (cuotón)
             </p>
             <p className="mt-1 text-xl font-bold text-slate-900">
@@ -79,7 +79,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
             </p>
           </div>
         </div>
-        <div className="rounded-lg border-l-4 border-slate-400 bg-white p-5 shadow-suave">
+        <div className="border border-slate-200 bg-white p-5">
           <p className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
             Total pagado (cuotas + cuotón) <AyudaTooltip termino="Costo total del credito" />
           </p>
@@ -91,15 +91,15 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
           )}
           <p className="mt-1 text-xs text-slate-500">No incluye la cuota inicial.</p>
         </div>
-        <div className="rounded-lg border-l-4 border-acento-600 bg-white p-5 shadow-suave">
+        <div className="border border-slate-200 bg-white p-5">
           <p className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
             TCEA <AyudaTooltip termino="TCEA" />
           </p>
           <p className="mt-1 text-3xl font-bold text-acento-700">
             {formatoPorcentaje(indicadores.tcea)}
           </p>
-          <div className="mt-4 rounded-lg border border-acento-200 bg-acento-50/60 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-acento-700">
+          <div className="mt-4 border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               TEA equivalente
             </p>
             <p className="mt-1 text-xl font-bold text-slate-900">
@@ -114,7 +114,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
       <div className="tarjeta p-5">
         <h3 className="text-sm font-bold text-slate-800">Resumen de costos</h3>
         <p className="mt-0.5 text-xs text-slate-500">
-          Desglose de lo que financia y paga el cliente (Plan {indicadores.plan === "PLAN_24" ? "24" : "36"}).
+          Desglose de lo que financias y pagas (Plan {indicadores.plan === "PLAN_24" ? "24" : "36"}).
         </p>
         <dl className="mt-4 divide-y divide-slate-100">
           <FilaCosto etiqueta="Precio del vehículo" valor={formatoMoneda(indicadores.precio_vehiculo, moneda)} />
@@ -214,7 +214,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
             <span className="h-3 w-3 rounded-sm bg-marca-100 ring-1 ring-marca-200" /> Pago del cuotón
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="font-medium text-red-600">(rojo)</span> = egresos del cliente
+            <span className="font-medium text-red-600">(rojo)</span> = lo que pagas
           </span>
         </div>
 
@@ -255,7 +255,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
               </tr>
             </thead>
             <tbody>
-              {/* Periodo 0: el cliente recibe el monto del prestamo (ingreso). */}
+              {/* Periodo 0: recibes el monto del prestamo (ingreso). */}
               <tr className="bg-emerald-50/50">
                 <td className="text-right !text-slate-500">0</td>
                 <td className="text-center !text-slate-400">—</td>

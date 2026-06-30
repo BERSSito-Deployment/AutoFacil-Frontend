@@ -23,25 +23,6 @@ export interface Usuario {
   fecha_actualizacion: string;
 }
 
-export interface Cliente {
-  id: number;
-  tipo_documento: string;
-  numero_documento: string;
-  nombres: string;
-  apellidos: string;
-  correo?: string | null;
-  telefono?: string | null;
-  direccion?: string | null;
-  fecha_nacimiento?: string | null;
-  ingreso_mensual: number;
-  gastos_mensuales: number;
-  otras_deudas: number;
-  moneda_ingresos: Moneda;
-  activo: boolean;
-  fecha_creacion: string;
-  fecha_actualizacion: string;
-}
-
 export interface Vehiculo {
   id: number;
   marca: string;
@@ -140,7 +121,6 @@ export interface ResultadoCalculo extends Indicadores {
 }
 
 export interface ParametrosSimulacion {
-  cliente_id: number;
   vehiculo_id: number;
   nombre?: string | null;
   moneda: Moneda;
@@ -181,7 +161,6 @@ export interface Simulacion extends Indicadores {
   id: number;
   codigo: string;
   nombre?: string | null;
-  cliente_id: number;
   vehiculo_id: number;
   usuario_id: number;
   estado: EstadoSimulacion;
@@ -198,7 +177,6 @@ export interface Simulacion extends Indicadores {
   comision_estudio_financiado: boolean;
   comision_activacion: number;
   comision_activacion_financiado: boolean;
-  cliente_nombre?: string | null;
   vehiculo_descripcion?: string | null;
   usuario_nombre?: string | null;
   fecha_creacion: string;
@@ -213,9 +191,7 @@ export interface SimulacionListado {
   estado: EstadoSimulacion;
   moneda: Moneda;
   plan: Plan;
-  cliente_id: number;
   vehiculo_id: number;
-  cliente_nombre?: string | null;
   vehiculo_descripcion?: string | null;
   monto_prestamo: number;
   numero_cuotas: number;

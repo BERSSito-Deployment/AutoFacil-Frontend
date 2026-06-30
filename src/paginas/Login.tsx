@@ -43,7 +43,7 @@ export function Login() {
           <p className="text-sm text-slate-500">Simulador de crédito vehicular</p>
         </div>
 
-        <div className="tarjeta p-6 shadow-realce">
+        <div className="tarjeta p-6">
           <h2 className="text-lg font-bold text-slate-900">Inicia sesión</h2>
           <form onSubmit={enviar} className="mt-5 space-y-4">
             <div>

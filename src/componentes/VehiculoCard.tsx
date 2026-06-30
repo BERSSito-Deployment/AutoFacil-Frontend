@@ -17,7 +17,7 @@ export function VehiculoCard({ vehiculo, gestion = false, onDesactivar }: PropsV
   const [errorImagen, setErrorImagen] = useState(false);
 
   return (
-    <div className="tarjeta group flex flex-col overflow-hidden transition-shadow hover:shadow-md">
+    <div className="tarjeta group flex flex-col overflow-hidden">
       {/* Foto del vehiculo; si no carga, un marcador elegante con la marca. */}
       <div className="relative h-44 w-full overflow-hidden">
         {errorImagen ? (

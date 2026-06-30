@@ -39,9 +39,9 @@ export const GLOSARIO: Record<string, string> = {
   "Tasa efectiva":
     "Tasa de interés que ya incorpora el efecto de la capitalización en el período indicado.",
   "Cuota inicial":
-    "Monto que paga el cliente al inicio; reduce el monto que se financia con el crédito.",
+    "Monto que pagas al inicio; reduce el monto que se financia con el crédito.",
   "Monto financiado":
     "Monto del préstamo: precio del vehículo menos la cuota inicial, más los costos iniciales que se financian.",
   "Costo total del credito":
-    "Total que paga el cliente en las cuotas mensuales y el cuotón final (incluye capital, intereses, seguros y cargos). No incluye la cuota inicial.",
+    "Total que pagas en las cuotas mensuales y el cuotón final (incluye capital, intereses, seguros y cargos). No incluye la cuota inicial.",
 };

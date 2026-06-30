@@ -10,14 +10,12 @@ import {
   actualizarSimulacion,
   calcularSimulacion,
   guardarSimulacion,
-  listarClientes,
   listarVehiculos,
   obtenerSimulacion,
   obtenerTipoCambio,
 } from "../api/servicios";
 import type {
   Capitalizacion,
-  Cliente,
   Moneda,
   ParametrosSimulacion,
   Plan,
@@ -35,7 +33,6 @@ import {
 
 interface FormularioSimulacion {
   nombre: string;
-  cliente_id: number;
   vehiculo_id: number;
   moneda: Moneda;
   tipo_cambio_referencial: number;
@@ -68,7 +65,6 @@ interface FormularioSimulacion {
 
 const VALOR_INICIAL: FormularioSimulacion = {
   nombre: "",
-  cliente_id: 0,
   vehiculo_id: 0,
   moneda: "PEN",
   tipo_cambio_referencial: 3.75,
@@ -172,7 +168,6 @@ export function NuevaSimulacion() {
   const navegar = useNavigate();
   const [parametrosUrl] = useSearchParams();
 
-  const [clientes, setClientes] = useState<Cliente[]>([]);
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [datos, setDatos] = useState<FormularioSimulacion>(VALOR_INICIAL);
   const [resultado, setResultado] = useState<ResultadoCalculo | null>(null);
@@ -186,15 +181,14 @@ export function NuevaSimulacion() {
   // Tipo de cambio en tiempo real (solo informativo, para creditos en Dolares).
   const [tipoCambio, setTipoCambio] = useState<TipoCambio | null>(null);
 
-  // Se ofrecen todos los vehiculos activos del asesor.
+  // Vehiculos del usuario disponibles para simular.
   const vehiculosActivos = useMemo(() => vehiculos.filter((v) => v.activo), [vehiculos]);
 
   useEffect(() => {
-    // Al editar se incluyen los vehiculos dados de baja para que la propuesta
-    // historica muestre su vehiculo aunque ya no este activo.
-    Promise.all([listarClientes(), listarVehiculos(undefined, editando)])
-      .then(([listaClientes, listaVehiculos]) => {
-        setClientes(listaClientes);
+    // Al editar se incluyen los vehiculos dados de baja para mostrar el de la
+    // simulacion historica aunque ya no este activo.
+    listarVehiculos(undefined, editando)
+      .then((listaVehiculos) => {
         setVehiculos(listaVehiculos);
         const vehiculoUrl = Number(parametrosUrl.get("vehiculo"));
         if (!id && vehiculoUrl) {
@@ -221,7 +215,6 @@ export function NuevaSimulacion() {
       .then((simulacion) => {
         setDatos({
           nombre: simulacion.nombre ?? "",
-          cliente_id: simulacion.cliente_id,
           vehiculo_id: simulacion.vehiculo_id,
           moneda: simulacion.moneda,
           tipo_cambio_referencial: simulacion.tipo_cambio_referencial ?? 3.75,
@@ -270,7 +263,7 @@ export function NuevaSimulacion() {
     return vehiculosActivos;
   }, [vehiculoSeleccionado, vehiculosActivos]);
 
-  // La moneda del credito la elige el asesor y puede diferir de la del vehiculo:
+  // La moneda del credito la elige el usuario y puede diferir de la del vehiculo:
   // en ese caso el precio se convierte con el tipo de cambio.
   const monedaCredito = datos.moneda;
   const monedaVehiculo = vehiculoSeleccionado ? vehiculoSeleccionado.moneda : datos.moneda;
@@ -360,9 +353,6 @@ export function NuevaSimulacion() {
   };
 
   const validar = (): string | null => {
-    if (!datos.cliente_id) {
-      return "Debe seleccionar un cliente.";
-    }
     if (!datos.vehiculo_id) {
       return "Debe seleccionar un vehículo.";
     }
@@ -385,7 +375,6 @@ export function NuevaSimulacion() {
   };
 
   const construirCarga = (): ParametrosSimulacion => ({
-    cliente_id: datos.cliente_id,
     vehiculo_id: datos.vehiculo_id,
     nombre: datos.nombre.trim() || null,
     moneda: monedaCredito,
@@ -475,8 +464,8 @@ export function NuevaSimulacion() {
           {editando ? "Editar simulación" : "Nueva simulación"}
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Producto Compra Inteligente: elige el cliente y el vehículo, el plan (que define la cuota
-          final), la cuota inicial, la gracia y los cargos, y pulsa
+          Producto Compra Inteligente: elige el vehículo, el plan (que define la cuota final), la
+          cuota inicial, la gracia y los cargos, y pulsa
           <span className="font-medium text-slate-700"> Ver vista previa</span> para revisar la cuota
           y la TCEA antes de guardar.
         </p>
@@ -485,28 +474,14 @@ export function NuevaSimulacion() {
       {error && <Mensaje tipo="error">{error}</Mensaje>}
 
       <section className="tarjeta space-y-5 p-6">
-        <Paso numero={1} titulo="Cliente y vehículo" />
-        {(vehiculosActivos.length === 0 || clientes.length === 0) && (
+        <Paso numero={1} titulo="Vehículo" />
+        {vehiculosActivos.length === 0 && (
           <Mensaje tipo="info">
-            Necesitas al menos un cliente y un vehículo. Agrégalos en las secciones "Clientes" y
-            "Catálogo vehicular" para poder simular.
+            Necesitas al menos un vehículo. Agrégalo en la pantalla de inicio ("Mis vehículos") para
+            poder simular.
           </Mensaje>
         )}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <Campo etiqueta="Cliente" descripcion="Persona interesada en el crédito. Regístrala antes en la sección Clientes.">
-            <select
-              className="campo-entrada"
-              value={datos.cliente_id}
-              onChange={(evento) => actualizar("cliente_id", Number(evento.target.value))}
-            >
-              <option value={0}>Seleccione un cliente</option>
-              {clientes.map((cliente) => (
-                <option key={cliente.id} value={cliente.id}>
-                  {cliente.nombres} {cliente.apellidos} - {cliente.numero_documento}
-                </option>
-              ))}
-            </select>
-          </Campo>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Campo etiqueta="Vehículo" descripcion="Vehículo a financiar. Su precio es la base del cálculo.">
             <select
               className="campo-entrada"
@@ -644,7 +619,7 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="COK (Costo de Oportunidad) %"
             ayuda="COK"
-            descripcion="Rendimiento anual que el cliente esperaría de un uso alternativo de su dinero. Se usa para descontar el flujo en el VAN."
+            descripcion="Rendimiento anual que esperarías de un uso alternativo de tu dinero. Se usa para descontar el flujo en el VAN."
           >
             <input
               className="campo-entrada"
@@ -702,11 +677,11 @@ export function NuevaSimulacion() {
         )}
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Cuota inicial: el asesor elige ingresarla como porcentaje o como monto. */}
+          {/* Cuota inicial: se puede ingresar como porcentaje o como monto. */}
           <Campo
             etiqueta="Cuota inicial"
             ayuda="Cuota inicial"
-            descripcion="Pago que adelanta el cliente al inicio. Puedes ingresarlo como porcentaje del precio o como monto en dinero."
+            descripcion="Pago que adelantas al inicio. Puedes ingresarlo como porcentaje del precio o como monto en dinero."
           >
             <div className="flex gap-2">
               <div className="inline-flex shrink-0 overflow-hidden rounded-md border border-slate-300">
@@ -926,8 +901,8 @@ export function NuevaSimulacion() {
           </p>
           <p className="mb-3 text-xs text-slate-500">
             Marca cada uno como <span className="font-medium">Financiado</span> (se suma al préstamo y
-            se paga en las cuotas) o <span className="font-medium">Al contado</span> (lo paga el
-            cliente aparte). Déjalos en 0 si no aplican.
+            se paga en las cuotas) o <span className="font-medium">Al contado</span> (lo pagas
+            aparte). Déjalos en 0 si no aplican.
           </p>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <CostoInicialCampo
@@ -979,7 +954,7 @@ export function NuevaSimulacion() {
           type="button"
           className="boton-primario"
           onClick={guardar}
-          disabled={guardando || !datos.cliente_id || !datos.vehiculo_id}
+          disabled={guardando || !datos.vehiculo_id}
         >
           {guardando ? "Guardando..." : editando ? "Guardar cambios" : "Guardar simulación"}
         </button>

@@ -1,4 +1,4 @@
-// Pantalla de inicio: el catalogo vehicular es lo primero que ve el asesor.
+// Pantalla de inicio: los vehiculos del usuario para elegir cual simular.
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
@@ -48,7 +48,7 @@ export function Dashboard() {
       {/* Encabezado: el catalogo es el protagonista. */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Catálogo vehicular</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Mis vehículos</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link to="/vehiculos/nuevo" className="boton-secundario">

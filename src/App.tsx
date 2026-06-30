@@ -5,8 +5,6 @@ import { RutaProtegida } from "./componentes/RutaProtegida";
 import { Login } from "./paginas/Login";
 import { Registro } from "./paginas/Registro";
 import { Dashboard } from "./paginas/Dashboard";
-import { Clientes } from "./paginas/Clientes";
-import { ClienteFormulario } from "./paginas/ClienteFormulario";
 import { VehiculoFormulario } from "./paginas/VehiculoFormulario";
 import { NuevaSimulacion } from "./paginas/NuevaSimulacion";
 import { Simulaciones } from "./paginas/Simulaciones";
@@ -26,9 +24,6 @@ export function App() {
         }
       >
         <Route path="/" element={<Dashboard />} />
-        <Route path="/clientes" element={<Clientes />} />
-        <Route path="/clientes/nuevo" element={<ClienteFormulario />} />
-        <Route path="/clientes/:id" element={<ClienteFormulario />} />
         {/* El catalogo vive en la pantalla de inicio ("/"). */}
         <Route path="/vehiculos" element={<Navigate to="/" replace />} />
         <Route path="/vehiculos/nuevo" element={<VehiculoFormulario />} />

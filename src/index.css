@@ -19,23 +19,23 @@
 
 @layer components {
   .tarjeta {
-    @apply rounded-xl border border-slate-200/80 bg-white shadow-tarjeta;
+    @apply border border-slate-200 bg-white;
   }
 
   .boton-primario {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-marca-700 px-4 py-2.5 text-sm font-semibold text-white shadow-suave transition-all hover:bg-marca-800 hover:shadow-realce focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marca-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-marca-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-marca-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marca-600 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .boton-secundario {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-marca-300 hover:bg-marca-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-marca-300 hover:bg-marca-50 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .boton-acento {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-acento-600 px-4 py-2.5 text-sm font-semibold text-white shadow-suave transition-all hover:bg-acento-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-acento-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-acento-700 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .campo-entrada {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-marca-500 focus:ring-2 focus:ring-marca-500/30 disabled:bg-slate-100 disabled:text-slate-500;
+    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-marca-500 focus:ring-2 focus:ring-marca-500/30 disabled:bg-slate-100 disabled:text-slate-500;
   }
 
   .etiqueta-campo {

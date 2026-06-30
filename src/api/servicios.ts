@@ -1,7 +1,6 @@
 // Funciones de acceso a los endpoints del backend agrupadas por dominio.
 import { clienteHttp } from "./cliente";
 import type {
-  Cliente,
   ResultadoCalculo,
   Simulacion,
   SimulacionGuardar,
@@ -54,34 +53,6 @@ export async function actualizarPerfil(datos: DatosPerfil): Promise<Usuario> {
   return respuesta.data;
 }
 
-// --- Clientes ---
-export async function listarClientes(busqueda?: string): Promise<Cliente[]> {
-  const respuesta = await clienteHttp.get<Cliente[]>("/clientes", {
-    params: { busqueda: busqueda || undefined },
-  });
-  return respuesta.data;
-}
-
-export async function obtenerCliente(id: number): Promise<Cliente> {
-  const respuesta = await clienteHttp.get<Cliente>(`/clientes/${id}`);
-  return respuesta.data;
-}
-
-export async function crearCliente(datos: Partial<Cliente>): Promise<Cliente> {
-  const respuesta = await clienteHttp.post<Cliente>("/clientes", datos);
-  return respuesta.data;
-}
-
-export async function actualizarCliente(id: number, datos: Partial<Cliente>): Promise<Cliente> {
-  const respuesta = await clienteHttp.put<Cliente>(`/clientes/${id}`, datos);
-  return respuesta.data;
-}
-
-export async function desactivarCliente(id: number): Promise<Cliente> {
-  const respuesta = await clienteHttp.delete<Cliente>(`/clientes/${id}`);
-  return respuesta.data;
-}
-
 // --- Vehiculos ---
 export async function listarVehiculos(
   busqueda?: string,
@@ -128,7 +99,6 @@ export async function guardarSimulacion(datos: SimulacionGuardar): Promise<Simul
 }
 
 export async function listarSimulaciones(filtros?: {
-  cliente_id?: number;
   vehiculo_id?: number;
   estado?: EstadoSimulacion;
   busqueda?: string;

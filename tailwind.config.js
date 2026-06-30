@@ -53,11 +53,6 @@ export default {
           "sans-serif",
         ],
       },
-      boxShadow: {
-        suave: "0 1px 2px rgba(2, 42, 36, 0.06)",
-        tarjeta: "0 1px 3px rgba(2, 42, 36, 0.08), 0 1px 2px rgba(2, 42, 36, 0.04)",
-        realce: "0 12px 30px -12px rgba(0, 109, 91, 0.25)",
-      },
     },
   },
   plugins: [],

@@ -157,11 +157,7 @@ export function SimulacionDetalle() {
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       {mensajeOk && <Mensaje tipo="exito">{mensajeOk}</Mensaje>}
 
-      <section className="tarjeta grid grid-cols-1 gap-4 p-6 sm:grid-cols-3">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-slate-400">Cliente</p>
-          <p className="text-sm font-medium text-slate-700">{simulacion.cliente_nombre ?? "-"}</p>
-        </div>
+      <section className="tarjeta grid grid-cols-1 gap-4 p-6 sm:grid-cols-2">
         <div>
           <p className="text-xs uppercase tracking-wide text-slate-400">Vehículo</p>
           <p className="text-sm font-medium text-slate-700">

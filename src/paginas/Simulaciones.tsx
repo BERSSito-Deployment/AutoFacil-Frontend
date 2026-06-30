@@ -56,7 +56,7 @@ export function Simulaciones() {
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
           className="campo-entrada pl-9"
-          placeholder="Buscar por cliente, vehículo o nombre"
+          placeholder="Buscar por vehículo o nombre"
           value={busqueda}
           onChange={(evento) => setBusqueda(evento.target.value)}
         />
@@ -86,7 +86,6 @@ export function Simulaciones() {
             <thead>
               <tr>
                 <th>Simulación</th>
-                <th>Cliente</th>
                 <th>Vehículo</th>
                 <th className="text-right">Monto del préstamo</th>
                 <th className="text-right">Cuota mensual</th>
@@ -109,7 +108,6 @@ export function Simulaciones() {
                       <p className="text-xs text-slate-400">{simulacion.nombre}</p>
                     )}
                   </td>
-                  <td>{simulacion.cliente_nombre ?? "-"}</td>
                   <td>{simulacion.vehiculo_descripcion ?? "-"}</td>
                   <td className="text-right">
                     {formatoMoneda(simulacion.monto_prestamo, simulacion.moneda)}
