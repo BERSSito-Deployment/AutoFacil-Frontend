@@ -62,7 +62,7 @@ export function AyudaTooltip({ termino, texto }: PropiedadesAyuda) {
               top: haciaAbajo ? posicion.bottom + 8 : posicion.top - 8,
               transform: haciaAbajo ? "translateX(-50%)" : "translate(-50%, -100%)",
             }}
-            className="pointer-events-none z-[9999] block w-64 rounded-md border border-slate-200 bg-white p-3 text-xs font-normal leading-relaxed text-slate-700 shadow-lg"
+            className="pointer-events-none z-[9999] block w-64 rounded-sm border border-slate-400 bg-white p-3 text-xs font-normal leading-relaxed text-slate-700"
           >
             <span className="mb-1 block font-semibold text-marca-700">{String(termino)}</span>
             {explicacion}

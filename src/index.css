@@ -23,19 +23,15 @@
   }
 
   .boton-primario {
-    @apply inline-flex items-center justify-center gap-2 rounded-md bg-marca-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-marca-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marca-600 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-marca-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-marca-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marca-600 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .boton-secundario {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-marca-300 hover:bg-marca-50 disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
-  .boton-acento {
-    @apply inline-flex items-center justify-center gap-2 rounded-md bg-acento-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-acento-700 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-marca-300 hover:bg-marca-50 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .campo-entrada {
-    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-marca-500 focus:ring-2 focus:ring-marca-500/30 disabled:bg-slate-100 disabled:text-slate-500;
+    @apply w-full rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-marca-500 focus:ring-2 focus:ring-marca-500/30 disabled:bg-slate-100 disabled:text-slate-500;
   }
 
   .etiqueta-campo {
@@ -66,10 +62,6 @@
   .tabla-compacta th,
   .tabla-compacta td {
     @apply px-2 py-1.5 text-xs;
-  }
-
-  .insignia {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
   }
 
   .titulo-seccion {

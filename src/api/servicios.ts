@@ -39,7 +39,7 @@ export async function obtenerPerfil(): Promise<Usuario> {
   return respuesta.data;
 }
 
-export interface DatosPerfil {
+interface DatosPerfil {
   nombre?: string;
   apellido?: string;
   correo?: string;

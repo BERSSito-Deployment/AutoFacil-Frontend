@@ -127,6 +127,7 @@ export interface ParametrosSimulacion {
   tipo_cambio_referencial?: number | null;
   plan: Plan;
   porcentaje_cuota_inicial: number;
+  porcentaje_cuota_final: number;
   tipo_tasa: TipoTasa;
   valor_tasa: number;
   capitalizacion?: Capitalizacion | null;

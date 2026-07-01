@@ -18,6 +18,6 @@ export function Mensaje({
     return null;
   }
   return (
-    <div className={`rounded-lg border px-4 py-3 text-sm ${CLASES[tipo]}`}>{children}</div>
+    <div className={`rounded-sm border px-4 py-3 text-sm ${CLASES[tipo]}`}>{children}</div>
   );
 }

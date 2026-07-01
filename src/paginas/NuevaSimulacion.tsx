@@ -41,6 +41,7 @@ interface FormularioSimulacion {
   valor_tasa: number;
   capitalizacion: Capitalizacion | "";
   porcentaje_cuota_inicial: number;
+  porcentaje_cuota_final: number;
   meses_gracia_total: number;
   meses_gracia_parcial: number;
   costo_notarial: number;
@@ -73,6 +74,7 @@ const VALOR_INICIAL: FormularioSimulacion = {
   valor_tasa: 15,
   capitalizacion: "DIARIA",
   porcentaje_cuota_inicial: 20,
+  porcentaje_cuota_final: 40,
   meses_gracia_total: 0,
   meses_gracia_parcial: 0,
   costo_notarial: 0,
@@ -223,6 +225,7 @@ export function NuevaSimulacion() {
           valor_tasa: decimalAPorcentaje(simulacion.tasa_ingresada),
           capitalizacion: simulacion.capitalizacion ?? "",
           porcentaje_cuota_inicial: decimalAPorcentaje(simulacion.porcentaje_cuota_inicial),
+          porcentaje_cuota_final: decimalAPorcentaje(simulacion.porcentaje_cuota_final),
           meses_gracia_total: simulacion.meses_gracia_total,
           meses_gracia_parcial: simulacion.meses_gracia_parcial,
           costo_notarial: simulacion.costo_notarial,
@@ -281,7 +284,7 @@ export function NuevaSimulacion() {
         : precioVehiculo * tipoCambioValor;
   const montoCuotaInicial = (precioCredito * datos.porcentaje_cuota_inicial) / 100;
   const numeroCuotas = CUOTAS_POR_PLAN[datos.plan];
-  const porcentajeCuotaFinal = CUOTA_FINAL_POR_PLAN[datos.plan];
+  const porcentajeCuotaFinal = datos.porcentaje_cuota_final;
   const montoCuotaFinal = (precioCredito * porcentajeCuotaFinal) / 100;
   const simboloMoneda = monedaCredito === "USD" ? "US$" : "S/";
 
@@ -384,6 +387,7 @@ export function NuevaSimulacion() {
       requiereTipoCambio || monedaCredito === "USD" ? datos.tipo_cambio_referencial : null,
     plan: datos.plan,
     porcentaje_cuota_inicial: porcentajeADecimal(datos.porcentaje_cuota_inicial),
+    porcentaje_cuota_final: porcentajeADecimal(datos.porcentaje_cuota_final),
     tipo_tasa: datos.tipo_tasa,
     valor_tasa: porcentajeADecimal(datos.valor_tasa),
     capitalizacion: datos.tipo_tasa === "NOMINAL" ? (datos.capitalizacion as Capitalizacion) : null,
@@ -557,15 +561,23 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Plan de pagos"
             ayuda="Cuota balon"
-            descripcion="Plan 24: 24 cuotas y cuota final del 50% del precio. Plan 36: 36 cuotas y cuota final del 40%. La cuota final se difiere y se paga al término del crédito."
+            descripcion="Plan 24: 24 cuotas (cuota final por defecto 50%). Plan 36: 36 cuotas (cuota final por defecto 40%). Al cambiar de plan, la cuota final vuelve a su valor por defecto, pero puedes editarla."
           >
             <select
               className="campo-entrada"
               value={datos.plan}
-              onChange={(evento) => actualizar("plan", evento.target.value as Plan)}
+              onChange={(evento) => {
+                const nuevoPlan = evento.target.value as Plan;
+                setDatos((anterior) => ({
+                  ...anterior,
+                  plan: nuevoPlan,
+                  porcentaje_cuota_final: CUOTA_FINAL_POR_PLAN[nuevoPlan],
+                }));
+                setResultado(null);
+              }}
             >
-              <option value="PLAN_36">Plan 36 (36 cuotas, cuota final 40%)</option>
-              <option value="PLAN_24">Plan 24 (24 cuotas, cuota final 50%)</option>
+              <option value="PLAN_36">Plan 36 (36 cuotas)</option>
+              <option value="PLAN_24">Plan 24 (24 cuotas)</option>
             </select>
           </Campo>
           <Campo etiqueta="Tipo de tasa" ayuda="Tasa efectiva">
@@ -739,21 +751,29 @@ export function NuevaSimulacion() {
             </p>
           </Campo>
 
-          {/* Cuota final: derivada del plan, solo informativa. */}
+          {/* Cuota final (cuoton): parte del precio que se difiere al final. Editable;
+              su valor por defecto viene del plan (40% Plan 36, 50% Plan 24). */}
           <Campo
-            etiqueta="Cuota final (del plan)"
+            etiqueta="Cuota final (%)"
             ayuda="Cuota balon"
-            descripcion="Parte del precio que se difiere y se paga al final del crédito. La define el plan (40% en Plan 36, 50% en Plan 24)."
+            descripcion="Parte del precio que se difiere y se paga al final del crédito. Por defecto la define el plan (40% en Plan 36, 50% en Plan 24), pero puedes cambiarla."
           >
-            <div className="campo-entrada flex items-center justify-between bg-slate-50 text-slate-700">
-              <span className="font-semibold">{porcentajeCuotaFinal}%</span>
-              {precioVehiculo > 0 && (
-                <span className="text-xs text-slate-500">
-                  {formatoMoneda(montoCuotaFinal, monedaCredito)}
-                </span>
-              )}
-            </div>
-            <p className="mt-1 text-xs text-slate-500">Se paga en el periodo {numeroCuotas + 1}.</p>
+            <input
+              className="campo-entrada"
+              type="number"
+              step="0.01"
+              min="0"
+              max="99"
+              value={datos.porcentaje_cuota_final}
+              onChange={(evento) =>
+                actualizar("porcentaje_cuota_final", Number(evento.target.value))
+              }
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              {precioVehiculo > 0
+                ? `Equivale a ${formatoMoneda(montoCuotaFinal, monedaCredito)}, se paga en el periodo ${numeroCuotas + 1}.`
+                : `Se paga en el periodo ${numeroCuotas + 1}.`}
+            </p>
           </Campo>
 
           <Campo
@@ -834,7 +854,7 @@ export function NuevaSimulacion() {
         </div>
 
         {/* Costos periodicos por cuota. */}
-        <div className="rounded-md border border-slate-200 bg-slate-50/60 p-4">
+        <div className="border-t border-slate-200 pt-5">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Costos periódicos (monto por cada cuota)
           </p>
@@ -895,7 +915,7 @@ export function NuevaSimulacion() {
         </div>
 
         {/* Costos / gastos iniciales con modalidad. */}
-        <div className="rounded-md border border-slate-200 bg-slate-50/60 p-4">
+        <div className="border-t border-slate-200 pt-5">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Costos / gastos iniciales
           </p>

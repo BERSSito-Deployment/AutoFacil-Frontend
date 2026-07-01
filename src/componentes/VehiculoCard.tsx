@@ -21,7 +21,7 @@ export function VehiculoCard({ vehiculo, gestion = false, onDesactivar }: PropsV
       {/* Foto del vehiculo; si no carga, un marcador elegante con la marca. */}
       <div className="relative h-44 w-full overflow-hidden">
         {errorImagen ? (
-          <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-marca-50 to-slate-100">
+          <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100">
             <Car className="h-12 w-12 text-marca-300" />
             <span className="mt-2 text-xs font-medium uppercase tracking-wide text-marca-400">
               {vehiculo.marca}

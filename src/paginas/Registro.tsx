@@ -54,12 +54,11 @@ export function Registro() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-marca-50 via-slate-50 to-slate-100 px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
           <img src="/logo.png" alt="AutoFácil" className="h-14 w-14 object-contain" />
           <h1 className="mt-2 font-display text-2xl font-bold text-slate-900">AutoFácil</h1>
-          <p className="text-sm text-slate-500">Crea tu cuenta para simular tu crédito vehicular</p>
         </div>
 
         <div className="tarjeta p-6">
