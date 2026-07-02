@@ -3,8 +3,16 @@
 
 export type Moneda = "PEN" | "USD";
 export type TipoTasa = "EFECTIVA" | "NOMINAL";
-export type Capitalizacion = "DIARIA" | "MENSUAL";
-export type Plan = "PLAN_24" | "PLAN_36";
+export type Capitalizacion =
+  | "DIARIA"
+  | "QUINCENAL"
+  | "MENSUAL"
+  | "BIMESTRAL"
+  | "TRIMESTRAL"
+  | "CUATRIMESTRAL"
+  | "SEMESTRAL"
+  | "ANUAL";
+export type Plan = "PLAN_24" | "PLAN_36" | "PERSONALIZADO";
 export type EstadoSimulacion = "CALCULADA" | "ARCHIVADA";
 export type TipoPeriodo =
   | "GRACIA_TOTAL"
@@ -47,17 +55,17 @@ export interface TipoCambio {
   en_linea: boolean;
 }
 
-// Fila del cronograma: tramo del cuoton (cuota final diferida), tramo regular y flujo.
+// Fila del cronograma: tramo de la cuota final, tramo regular y flujo.
 export interface FilaCronograma {
   numero_periodo: number;
   fecha_pago: string;
   tipo_periodo: TipoPeriodo;
-  // Tramo del cuoton.
-  saldo_inicial_cuoton: number;
-  interes_cuoton: number;
-  amortizacion_cuoton: number;
-  desgravamen_cuoton: number;
-  saldo_final_cuoton: number;
+  // Tramo de la cuota final.
+  saldo_inicial_cuota_final: number;
+  interes_cuota_final: number;
+  amortizacion_cuota_final: number;
+  desgravamen_cuota_final: number;
+  saldo_final_cuota_final: number;
   // Tramo regular.
   saldo_inicial: number;
   interes: number;
@@ -77,7 +85,7 @@ export interface Indicadores {
   precio_vehiculo: number;
   plan: Plan;
   numero_cuotas: number;
-  numero_anios: number;
+  dias_anio: number;
   porcentaje_cuota_inicial: number;
   cuota_inicial: number;
   porcentaje_cuota_final: number;
@@ -126,6 +134,10 @@ export interface ParametrosSimulacion {
   moneda: Moneda;
   tipo_cambio_referencial?: number | null;
   plan: Plan;
+  // Meses del credito cuando el plan es personalizado.
+  numero_cuotas?: number | null;
+  // 360 (año ordinario) o 365 (año natural).
+  dias_anio: number;
   porcentaje_cuota_inicial: number;
   porcentaje_cuota_final: number;
   tipo_tasa: TipoTasa;

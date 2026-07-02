@@ -49,7 +49,6 @@ export function Perfil() {
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Mi perfil</h1>
         <p className="text-sm text-slate-500">
-          Actualiza tus datos personales y tu contraseña.
         </p>
       </div>
 
@@ -85,7 +84,7 @@ export function Perfil() {
           </Campo>
 
           <hr className="border-slate-100" />
-          <p className="titulo-seccion">Cambiar contraseña (opcional)</p>
+          <p className="titulo-seccion">Cambiar contraseña</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Campo etiqueta="Contraseña actual" descripcion="Requerida solo si vas a cambiar la contraseña.">
               <EntradaContrasena

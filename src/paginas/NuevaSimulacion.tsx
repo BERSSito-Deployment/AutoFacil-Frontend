@@ -25,6 +25,7 @@ import type {
   Vehiculo,
 } from "../tipos";
 import {
+  ETIQUETA_CAPITALIZACION,
   ETIQUETA_MONEDA,
   decimalAPorcentaje,
   formatoMoneda,
@@ -40,6 +41,8 @@ interface FormularioSimulacion {
   tipo_tasa: TipoTasa;
   valor_tasa: number;
   capitalizacion: Capitalizacion | "";
+  numero_cuotas: number;
+  dias_anio: number;
   porcentaje_cuota_inicial: number;
   porcentaje_cuota_final: number;
   meses_gracia_total: number;
@@ -73,6 +76,8 @@ const VALOR_INICIAL: FormularioSimulacion = {
   tipo_tasa: "NOMINAL",
   valor_tasa: 15,
   capitalizacion: "DIARIA",
+  numero_cuotas: 36,
+  dias_anio: 360,
   porcentaje_cuota_inicial: 20,
   porcentaje_cuota_final: 40,
   meses_gracia_total: 0,
@@ -97,10 +102,19 @@ const VALOR_INICIAL: FormularioSimulacion = {
   fecha_inicio: "",
 };
 
-const CAPITALIZACIONES: Capitalizacion[] = ["DIARIA", "MENSUAL"];
+const CAPITALIZACIONES: Capitalizacion[] = [
+  "DIARIA",
+  "QUINCENAL",
+  "MENSUAL",
+  "BIMESTRAL",
+  "TRIMESTRAL",
+  "CUATRIMESTRAL",
+  "SEMESTRAL",
+  "ANUAL",
+];
 
-const CUOTAS_POR_PLAN: Record<Plan, number> = { PLAN_24: 24, PLAN_36: 36 };
-const CUOTA_FINAL_POR_PLAN: Record<Plan, number> = { PLAN_24: 50, PLAN_36: 40 };
+// Cuota final sugerida por cada plan (el personalizado conserva la que este puesta).
+const CUOTA_FINAL_POR_PLAN: Record<string, number> = { PLAN_24: 50, PLAN_36: 40 };
 
 // Encabezado de paso con un numero en circulo, para guiar el formulario.
 function Paso({ numero, titulo }: { numero: number; titulo: string }) {
@@ -226,6 +240,8 @@ export function NuevaSimulacion() {
           capitalizacion: simulacion.capitalizacion ?? "",
           porcentaje_cuota_inicial: decimalAPorcentaje(simulacion.porcentaje_cuota_inicial),
           porcentaje_cuota_final: decimalAPorcentaje(simulacion.porcentaje_cuota_final),
+          numero_cuotas: simulacion.numero_cuotas,
+          dias_anio: simulacion.dias_anio,
           meses_gracia_total: simulacion.meses_gracia_total,
           meses_gracia_parcial: simulacion.meses_gracia_parcial,
           costo_notarial: simulacion.costo_notarial,
@@ -283,7 +299,8 @@ export function NuevaSimulacion() {
           : 0
         : precioVehiculo * tipoCambioValor;
   const montoCuotaInicial = (precioCredito * datos.porcentaje_cuota_inicial) / 100;
-  const numeroCuotas = CUOTAS_POR_PLAN[datos.plan];
+  const numeroCuotas =
+    datos.plan === "PLAN_24" ? 24 : datos.plan === "PLAN_36" ? 36 : datos.numero_cuotas;
   const porcentajeCuotaFinal = datos.porcentaje_cuota_final;
   const montoCuotaFinal = (precioCredito * porcentajeCuotaFinal) / 100;
   const simboloMoneda = monedaCredito === "USD" ? "US$" : "S/";
@@ -362,6 +379,9 @@ export function NuevaSimulacion() {
     if (datos.tipo_tasa === "NOMINAL" && !datos.capitalizacion) {
       return "Debe indicar la capitalización cuando la tasa es nominal.";
     }
+    if (datos.plan === "PERSONALIZADO" && (!datos.numero_cuotas || datos.numero_cuotas < 1)) {
+      return "Indica el número de meses del plan personalizado.";
+    }
     if (datos.meses_gracia_total + datos.meses_gracia_parcial >= numeroCuotas) {
       return "Los meses de gracia deben ser menores que el número de cuotas del plan.";
     }
@@ -369,7 +389,7 @@ export function NuevaSimulacion() {
       return "La cuota inicial no puede superar el 100% del precio.";
     }
     if (datos.porcentaje_cuota_inicial + porcentajeCuotaFinal >= 100) {
-      return "La cuota inicial y la cuota final del plan no pueden sumar el 100% del precio o más.";
+      return "La cuota inicial y la cuota final no pueden sumar el 100% del precio o más.";
     }
     if (requiereTipoCambio && datos.tipo_cambio_referencial <= 0) {
       return "Indica un tipo de cambio válido para simular en una moneda distinta a la del vehículo.";
@@ -386,6 +406,8 @@ export function NuevaSimulacion() {
     tipo_cambio_referencial:
       requiereTipoCambio || monedaCredito === "USD" ? datos.tipo_cambio_referencial : null,
     plan: datos.plan,
+    numero_cuotas: datos.plan === "PERSONALIZADO" ? datos.numero_cuotas : null,
+    dias_anio: datos.dias_anio,
     porcentaje_cuota_inicial: porcentajeADecimal(datos.porcentaje_cuota_inicial),
     porcentaje_cuota_final: porcentajeADecimal(datos.porcentaje_cuota_final),
     tipo_tasa: datos.tipo_tasa,
@@ -467,12 +489,6 @@ export function NuevaSimulacion() {
         <h1 className="text-2xl font-bold text-slate-900">
           {editando ? "Editar simulación" : "Nueva simulación"}
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Producto Compra Inteligente: elige el vehículo, el plan (que define la cuota final), la
-          cuota inicial, la gracia y los cargos, y pulsa
-          <span className="font-medium text-slate-700"> Ver vista previa</span> para revisar la cuota
-          y la TCEA antes de guardar.
-        </p>
       </div>
 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
@@ -561,7 +577,7 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Plan de pagos"
             ayuda="Cuota balon"
-            descripcion="Plan 24: 24 cuotas (cuota final por defecto 50%). Plan 36: 36 cuotas (cuota final por defecto 40%). Al cambiar de plan, la cuota final vuelve a su valor por defecto, pero puedes editarla."
+            descripcion="Plan 24: 24 cuotas (cuota final sugerida 50%). Plan 36: 36 cuotas (sugerida 40%). Personalizado: tú eliges los meses. Al cambiar a Plan 24 o 36 la cuota final vuelve a la sugerida, pero puedes editarla."
           >
             <select
               className="campo-entrada"
@@ -571,14 +587,29 @@ export function NuevaSimulacion() {
                 setDatos((anterior) => ({
                   ...anterior,
                   plan: nuevoPlan,
-                  porcentaje_cuota_final: CUOTA_FINAL_POR_PLAN[nuevoPlan],
+                  // Plan 24/36 traen su cuota final sugerida; el personalizado
+                  // respeta la que el usuario tenga puesta.
+                  porcentaje_cuota_final:
+                    CUOTA_FINAL_POR_PLAN[nuevoPlan] ?? anterior.porcentaje_cuota_final,
                 }));
                 setResultado(null);
               }}
             >
               <option value="PLAN_36">Plan 36 (36 cuotas)</option>
               <option value="PLAN_24">Plan 24 (24 cuotas)</option>
+              <option value="PERSONALIZADO">Personalizado (elige los meses)</option>
             </select>
+            {datos.plan === "PERSONALIZADO" && (
+              <input
+                className="campo-entrada mt-2"
+                type="number"
+                min="1"
+                max="120"
+                placeholder="Número de meses"
+                value={datos.numero_cuotas}
+                onChange={(evento) => actualizar("numero_cuotas", Number(evento.target.value))}
+              />
+            )}
           </Campo>
           <Campo etiqueta="Tipo de tasa" ayuda="Tasa efectiva">
             <select
@@ -615,9 +646,22 @@ export function NuevaSimulacion() {
               <option value="">Seleccione</option>
               {CAPITALIZACIONES.map((capitalizacion) => (
                 <option key={capitalizacion} value={capitalizacion}>
-                  {capitalizacion === "DIARIA" ? "Diaria" : "Mensual"}
+                  {ETIQUETA_CAPITALIZACION[capitalizacion]}
                 </option>
               ))}
+            </select>
+          </Campo>
+          <Campo
+            etiqueta="Días por año"
+            descripcion="Base para convertir las tasas: año ordinario de 360 días (12 cuotas exactas al año) o año natural de 365 días."
+          >
+            <select
+              className="campo-entrada"
+              value={datos.dias_anio}
+              onChange={(evento) => actualizar("dias_anio", Number(evento.target.value))}
+            >
+              <option value={360}>Ordinario (360 días)</option>
+              <option value={365}>Natural (365 días)</option>
             </select>
           </Campo>
           <Campo etiqueta="Fecha de inicio" descripcion="Fecha de desembolso del crédito. Las cuotas vencen cada 30 días a partir de esta fecha.">
@@ -751,8 +795,8 @@ export function NuevaSimulacion() {
             </p>
           </Campo>
 
-          {/* Cuota final (cuoton): parte del precio que se difiere al final. Editable;
-              su valor por defecto viene del plan (40% Plan 36, 50% Plan 24). */}
+          {/* Cuota final: parte del precio que se deja para el final. Editable;
+              se sugiere 40% en Plan 36 y 50% en Plan 24. */}
           <Campo
             etiqueta="Cuota final (%)"
             ayuda="Cuota balon"
@@ -859,8 +903,7 @@ export function NuevaSimulacion() {
             Costos periódicos (monto por cada cuota)
           </p>
           <p className="mb-3 text-xs text-slate-500">
-            Ingresa el monto de <span className="font-medium">una</span> cuota, no el total. Se cobran
-            en cada uno de los {numeroCuotas + 1} periodos.
+            Ingresa el monto de una cuota, no el total. Se cobran en cada uno de los periodos.
           </p>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <Campo etiqueta="GPS (por cuota)" ayuda="GPS" descripcion="Costo mensual del GPS que se cobra en cada cuota. Forma parte de la TCEA.">
@@ -920,8 +963,8 @@ export function NuevaSimulacion() {
             Costos / gastos iniciales
           </p>
           <p className="mb-3 text-xs text-slate-500">
-            Marca cada uno como <span className="font-medium">Financiado</span> (se suma al préstamo y
-            se paga en las cuotas) o <span className="font-medium">Al contado</span> (lo pagas
+            Marca cada uno como Financiado (se suma al préstamo y
+            se paga en las cuotas) o Al contado (lo pagas
             aparte). Déjalos en 0 si no aplican.
           </p>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">

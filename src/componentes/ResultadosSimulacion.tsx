@@ -10,7 +10,7 @@ interface PropiedadesResultados {
   tipoCambio?: number;
 }
 
-// Abreviatura del plazo de gracia (P.G.) como en el modelo del profesor.
+// Abreviatura del plazo de gracia: T = total, P = parcial, S = sin gracia.
 const PG_ABREV: Record<string, string> = {
   GRACIA_TOTAL: "T",
   GRACIA_PARCIAL: "P",
@@ -69,19 +69,19 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
           )}
           <div className="mt-4 border border-slate-200 bg-slate-50 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Cuota final (cuotón)
+              Cuota final
             </p>
-            <p className="mt-1 text-xl font-bold text-slate-900">
+            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900">
               {formatoMoneda(indicadores.cuota_final, moneda)}
             </p>
-            <p className="mt-1 text-sm font-semibold text-slate-600">
+            <p className="mt-1 text-sm text-slate-600">
               Se paga en el periodo {indicadores.numero_cuotas + 1}.
             </p>
           </div>
         </div>
         <div className="border border-slate-200 bg-white p-5">
           <p className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
-            Total pagado (cuotas + cuotón) <AyudaTooltip termino="Costo total del credito" />
+            Total pagado (cuotas + cuota final) <AyudaTooltip termino="Costo total del credito" />
           </p>
           <p className="mt-1 text-3xl font-bold text-slate-900">
             {formatoMoneda(indicadores.monto_total_pagado, moneda)}
@@ -105,7 +105,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
             <p className="mt-1 text-xl font-bold text-slate-900">
               {formatoPorcentaje(indicadores.tea_equivalente)}
             </p>
-            <p className="mt-1 text-sm font-semibold text-slate-600">Costo anual total del crédito.</p>
+            <p className="mt-1 text-sm text-slate-600">Solo el interés, sin seguros ni cargos.</p>
           </div>
         </div>
       </div>
@@ -114,7 +114,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
       <div className="tarjeta p-5">
         <h3 className="text-sm font-bold text-slate-800">Resumen de costos</h3>
         <p className="mt-0.5 text-xs text-slate-500">
-          Desglose de lo que financias y pagas (Plan {indicadores.plan === "PLAN_24" ? "24" : "36"}).
+          Desglose de lo que financias y pagas ({indicadores.numero_cuotas} cuotas).
         </p>
         <dl className="mt-4 divide-y divide-slate-100">
           <FilaCosto etiqueta="Precio del vehículo" valor={formatoMoneda(indicadores.precio_vehiculo, moneda)} />
@@ -124,7 +124,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
             ayuda="Cuota inicial"
           />
           <FilaCosto
-            etiqueta={`Cuota final / cuotón (${formatoPorcentaje(indicadores.porcentaje_cuota_final, 2)})`}
+            etiqueta={`Cuota final (${formatoPorcentaje(indicadores.porcentaje_cuota_final, 2)})`}
             valor={formatoMoneda(indicadores.cuota_final, moneda)}
             ayuda="Cuota balon"
           />
@@ -166,7 +166,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
           )}
           <div className="flex items-center justify-between py-2.5 text-sm">
             <dt className="flex items-center gap-1 font-semibold text-slate-800">
-              Total pagado (cuotas + cuotón) <AyudaTooltip termino="Costo total del credito" />
+              Total pagado (cuotas + cuota final) <AyudaTooltip termino="Costo total del credito" />
             </dt>
             <dd className="text-right">
               <span className="text-base font-bold text-marca-700">
@@ -191,7 +191,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
         <Indicador titulo="VAN" valor={formatoMoneda(indicadores.van, moneda)} ayuda="VAN" />
         <Indicador titulo="TIR mensual" valor={formatoPorcentaje(indicadores.tir_mensual)} ayuda="TIR" />
         <Indicador titulo="TIR anual" valor={formatoPorcentaje(indicadores.tir_anual)} ayuda="TIR" />
-        <Indicador titulo="Cuota final (cuotón)" valor={formatoMoneda(indicadores.cuota_final, moneda)} ayuda="Cuota balon" />
+        <Indicador titulo="Cuota final" valor={formatoMoneda(indicadores.cuota_final, moneda)} ayuda="Cuota balon" />
       </div>
 
       {/* Cronograma de pagos completo (replica el modelo del Excel). */}
@@ -200,7 +200,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
           <div>
             <h3 className="text-sm font-bold text-slate-800">Cronograma de pagos</h3>
             <p className="text-xs text-slate-500">
-              Método francés vencido, meses comerciales de 30 días. Incluye el cronograma del cuotón
+              Método francés vencido, meses comerciales de 30 días. Incluye el cronograma del cuota final
               (cuota final diferida) y el de la cuota regular. Importes en {moneda === "USD" ? "US$" : "S/"}.
             </p>
           </div>
@@ -211,7 +211,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
             <span className="h-3 w-3 rounded-sm bg-amber-100 ring-1 ring-amber-200" /> Período de gracia (T/P)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-sm bg-marca-100 ring-1 ring-marca-200" /> Pago del cuotón
+            <span className="h-3 w-3 rounded-sm bg-marca-100 ring-1 ring-marca-200" /> Pago de la cuota final
           </span>
           <span className="flex items-center gap-1.5">
             <span className="font-medium text-red-600">(rojo)</span> = lo que pagas
@@ -226,7 +226,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
                 <th rowSpan={2} className="text-center align-bottom">P.G.</th>
                 <th rowSpan={2} className="text-left align-bottom">Vencimiento</th>
                 <th colSpan={5} className="!bg-marca-50 text-center !text-marca-700">
-                  Cronograma de la cuota final (cuotón)
+                  Cronograma de la cuota final
                 </th>
                 <th colSpan={5} className="!bg-sky-50 text-center !text-sky-700">
                   Cronograma de la cuota regular
@@ -260,9 +260,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
                 <td className="text-right !text-slate-500">0</td>
                 <td className="text-center !text-slate-400">—</td>
                 <td className="text-left !text-slate-400">—</td>
-                <td colSpan={14} className="text-center text-xs !text-slate-400">
-                  Desembolso del préstamo
-                </td>
+                <td colSpan={14}></td>
                 <td className="text-right !text-slate-300">—</td>
                 <td className="text-right font-semibold !text-emerald-700">
                   {fmt(indicadores.monto_prestamo)}
@@ -285,11 +283,11 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
                     </td>
                     <td className="text-left !text-slate-600">{formatoFecha(fila.fecha_pago)}</td>
                     {/* Cuotón */}
-                    <Saldo valor={fila.saldo_inicial_cuoton} />
-                    <Egreso valor={fila.interes_cuoton} />
-                    <Egreso valor={fila.amortizacion_cuoton} />
-                    <Egreso valor={fila.desgravamen_cuoton} />
-                    <Saldo valor={fila.saldo_final_cuoton} />
+                    <Saldo valor={fila.saldo_inicial_cuota_final} />
+                    <Egreso valor={fila.interes_cuota_final} />
+                    <Egreso valor={fila.amortizacion_cuota_final} />
+                    <Egreso valor={fila.desgravamen_cuota_final} />
+                    <Saldo valor={fila.saldo_final_cuota_final} />
                     {/* Cuota regular */}
                     <Saldo valor={fila.saldo_inicial} />
                     <Egreso valor={fila.interes} />
