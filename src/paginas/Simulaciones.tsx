@@ -39,7 +39,6 @@ export function Simulaciones() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Historial de simulaciones</h1>
-          <p className="text-sm text-slate-500">Abre o edita las propuestas guardadas.</p>
         </div>
         <Link to="/simulaciones/nueva" className="boton-primario">
           Nueva simulación
@@ -88,6 +87,7 @@ export function Simulaciones() {
                 <th>Simulación</th>
                 <th>Vehículo</th>
                 <th className="text-right">Monto del préstamo</th>
+                <th className="text-right">Cuotas</th>
                 <th className="text-right">Cuota mensual</th>
                 <th className="text-right">TCEA</th>
                 <th>Fecha</th>
@@ -112,6 +112,7 @@ export function Simulaciones() {
                   <td className="text-right">
                     {formatoMoneda(simulacion.monto_prestamo, simulacion.moneda)}
                   </td>
+                  <td className="text-right">{simulacion.numero_cuotas}</td>
                   <td className="text-right">
                     {formatoMoneda(simulacion.cuota_mensual, simulacion.moneda)}
                   </td>

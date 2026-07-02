@@ -29,7 +29,7 @@ export const GLOSARIO: Record<string, string> = {
   GPS:
     "Costo periódico (mensual) del dispositivo de rastreo satelital que la entidad instala en el vehículo financiado. Se cobra en cada cuota y forma parte de la TCEA.",
   "Cuota balon":
-    "Cuota final (cuotón) del producto Compra Inteligente: una parte del precio se difiere y se paga en un solo desembolso al final del crédito (periodo N+1), lo que reduce las cuotas mensuales. Por defecto es 40% en el Plan 36 y 50% en el Plan 24, pero puedes cambiarla.",
+    "Cuota final del producto Compra Inteligente: una parte del precio se deja para el final y se paga en un solo desembolso (periodo N+1), lo que reduce las cuotas mensuales. Se sugiere 40% en el Plan 36 y 50% en el Plan 24, pero puedes cambiarla.",
   "Gastos iniciales":
     "Costos del inicio de la operación (notariales, registrales, tasación, comisiones). Cada uno puede financiarse (se suma al préstamo y se paga en las cuotas) o pagarse al contado.",
   "Seguro vehicular":
@@ -43,5 +43,5 @@ export const GLOSARIO: Record<string, string> = {
   "Monto financiado":
     "Monto del préstamo: precio del vehículo menos la cuota inicial, más los costos iniciales que se financian.",
   "Costo total del credito":
-    "Total que pagas en las cuotas mensuales y el cuotón final (incluye capital, intereses, seguros y cargos). No incluye la cuota inicial.",
+    "Total que pagas en las cuotas mensuales y la cuota final (incluye capital, intereses, seguros y cargos). No incluye la cuota inicial.",
 };

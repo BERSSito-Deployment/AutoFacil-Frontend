@@ -8,6 +8,7 @@ import { mensajeError } from "../api/cliente";
 import { archivarSimulacion, obtenerSimulacion, recalcularSimulacion } from "../api/servicios";
 import type { Simulacion } from "../tipos";
 import {
+  ETIQUETA_CAPITALIZACION,
   ETIQUETA_MONEDA,
   etiquetaSimulacion,
   formatoFecha,
@@ -182,7 +183,17 @@ export function SimulacionDetalle() {
           )}
           <Dato
             etiqueta="Plan"
-            valor={`${simulacion.plan === "PLAN_24" ? "Plan 24" : "Plan 36"} (${simulacion.numero_cuotas} cuotas)`}
+            valor={`${
+              simulacion.plan === "PLAN_24"
+                ? "Plan 24"
+                : simulacion.plan === "PLAN_36"
+                  ? "Plan 36"
+                  : "Personalizado"
+            } (${simulacion.numero_cuotas} cuotas)`}
+          />
+          <Dato
+            etiqueta="Días por año"
+            valor={simulacion.dias_anio === 365 ? "365 (natural)" : "360 (ordinario)"}
           />
           <Dato
             etiqueta="Cuota inicial"
@@ -192,7 +203,7 @@ export function SimulacionDetalle() {
             )})`}
           />
           <Dato
-            etiqueta="Cuota final (cuotón)"
+            etiqueta="Cuota final"
             valor={`${formatoMoneda(simulacion.cuota_final, moneda)} (${formatoPorcentaje(
               simulacion.porcentaje_cuota_final,
               2
@@ -213,7 +224,7 @@ export function SimulacionDetalle() {
           {simulacion.capitalizacion && (
             <Dato
               etiqueta="Capitalización"
-              valor={simulacion.capitalizacion === "DIARIA" ? "Diaria" : "Mensual"}
+              valor={ETIQUETA_CAPITALIZACION[simulacion.capitalizacion] ?? simulacion.capitalizacion}
             />
           )}
           <Dato etiqueta="TEA equivalente" valor={formatoPorcentaje(simulacion.tea_equivalente)} />

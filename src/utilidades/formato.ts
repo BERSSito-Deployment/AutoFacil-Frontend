@@ -63,6 +63,17 @@ export const ETIQUETA_MONEDA: Record<Moneda, string> = {
   USD: "Dólares (USD)",
 };
 
+export const ETIQUETA_CAPITALIZACION: Record<string, string> = {
+  DIARIA: "Diaria",
+  QUINCENAL: "Quincenal",
+  MENSUAL: "Mensual",
+  BIMESTRAL: "Bimestral",
+  TRIMESTRAL: "Trimestral",
+  CUATRIMESTRAL: "Cuatrimestral",
+  SEMESTRAL: "Semestral",
+  ANUAL: "Anual",
+};
+
 // Etiqueta amigable de una simulacion ("Simulación 1") a partir de su id o codigo.
 export function etiquetaSimulacion(idOCodigo: number | string): string {
   if (typeof idOCodigo === "number") {

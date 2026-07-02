@@ -57,10 +57,10 @@ export function Layout() {
             <Link
               key={ruta}
               to={ruta}
-              className={`block px-3 py-2 text-sm font-medium transition-colors ${
+              className={`block border-l-2 px-3 py-2 text-sm transition-colors ${
                 activo(pathname)
-                  ? "bg-marca-50 text-marca-700"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  ? "border-marca-700 font-semibold text-marca-800"
+                  : "border-transparent font-medium text-slate-600 hover:text-slate-900"
               }`}
             >
               {etiqueta}
