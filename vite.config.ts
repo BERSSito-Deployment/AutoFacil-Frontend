@@ -5,11 +5,12 @@ import react from "@vitejs/plugin-react";
 // `strictPort` evita que Vite cambie silenciosamente de puerto si el 5173 esta
 // ocupado: en ese caso muestra un error claro en lugar de usar otro puerto, lo
 // que evita abrir http://localhost:5173 cuando el servidor quedo en otro puerto.
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
+  base: command === "build" ? "/AutoFacil-Frontend/" : "/",
   server: {
     host: "localhost",
     port: 5173,
     strictPort: true,
   },
-});
+}));
