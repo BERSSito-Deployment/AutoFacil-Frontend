@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/AutoFacil-Frontend/logo.png" />
+    <title>AutoFacil</title>
+    <script type="text/javascript">
+      // Redirección para Single Page App en GitHub Pages
+      (function() {
+        var redirect = sessionStorage.getItem('redirect_path');
+        if (redirect) {
+          sessionStorage.removeItem('redirect_path');
+          if (redirect !== window.location.pathname + window.location.search + window.location.hash) {
+            window.history.replaceState(null, null, redirect);
+          }
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/AutoFacil-Frontend/assets/index-28vJh30B.js"></script>
+    <link rel="stylesheet" crossorigin href="/AutoFacil-Frontend/assets/index-kuI5fGkQ.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
