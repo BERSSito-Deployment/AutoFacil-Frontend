@@ -102,7 +102,7 @@ export function Simulaciones() {
                       to={`/simulaciones/${simulacion.id}`}
                       className="font-semibold text-marca-700 hover:underline"
                     >
-                      {etiquetaSimulacion(simulacion.id)}
+                      {etiquetaSimulacion(simulacion.codigo)}
                     </Link>
                     {simulacion.nombre && (
                       <p className="text-xs text-slate-400">{simulacion.nombre}</p>

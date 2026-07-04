@@ -13,9 +13,9 @@ import type {
 } from "../tipos";
 
 // --- Autenticacion ---
-export async function iniciarSesion(usuario: string, password: string): Promise<string> {
+export async function iniciarSesion(correo: string, password: string): Promise<string> {
   const respuesta = await clienteHttp.post<{ access_token: string }>("/auth/login-json", {
-    usuario,
+    correo,
     password,
   });
   return respuesta.data.access_token;
@@ -25,7 +25,6 @@ export interface DatosRegistro {
   nombre: string;
   apellido: string;
   correo: string;
-  usuario: string;
   password: string;
 }
 
@@ -43,7 +42,6 @@ interface DatosPerfil {
   nombre?: string;
   apellido?: string;
   correo?: string;
-  usuario?: string;
   password_actual?: string;
   password_nueva?: string;
 }
