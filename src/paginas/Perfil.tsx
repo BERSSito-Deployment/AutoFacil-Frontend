@@ -12,7 +12,6 @@ export function Perfil() {
   const [nombre, setNombre] = useState(usuario?.nombre ?? "");
   const [apellido, setApellido] = useState(usuario?.apellido ?? "");
   const [correo, setCorreo] = useState(usuario?.correo ?? "");
-  const [nombreUsuario, setNombreUsuario] = useState(usuario?.usuario ?? "");
   const [passwordActual, setPasswordActual] = useState("");
   const [passwordNueva, setPasswordNueva] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +28,6 @@ export function Perfil() {
         nombre,
         apellido,
         correo,
-        usuario: nombreUsuario,
         password_actual: passwordActual || undefined,
         password_nueva: passwordNueva || undefined,
       });
@@ -48,8 +46,6 @@ export function Perfil() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Mi perfil</h1>
-        <p className="text-sm text-slate-500">
-        </p>
       </div>
 
       <div className="mx-auto max-w-2xl space-y-6">
@@ -66,21 +62,8 @@ export function Perfil() {
               <input className="campo-entrada" value={apellido} onChange={(e) => setApellido(e.target.value)} required />
             </Campo>
           </div>
-          <Campo etiqueta="Correo" descripcion="Correo de contacto.">
+          <Campo etiqueta="Correo" descripcion="Con este correo inicias sesión.">
             <input className="campo-entrada" type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} required />
-          </Campo>
-          <Campo
-            etiqueta="Usuario"
-            descripcion="Nombre con el que inicias sesión. Mínimo 3 caracteres, sin '@' y no solo números."
-          >
-            <input
-              className="campo-entrada"
-              value={nombreUsuario}
-              onChange={(e) => setNombreUsuario(e.target.value)}
-              autoComplete="username"
-              minLength={3}
-              required
-            />
           </Campo>
 
           <hr className="border-slate-100" />

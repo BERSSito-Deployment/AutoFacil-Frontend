@@ -13,7 +13,6 @@ export function Registro() {
     nombre: "",
     apellido: "",
     correo: "",
-    usuario: "",
     password: "",
   });
   const [error, setError] = useState("");
@@ -42,7 +41,6 @@ export function Registro() {
         nombre: datos.nombre.trim(),
         apellido: datos.apellido.trim(),
         correo: datos.correo.trim(),
-        usuario: datos.usuario.trim(),
         password: datos.password,
       });
       navegar("/", { replace: true });
@@ -90,16 +88,6 @@ export function Registro() {
                 type="email"
                 value={datos.correo}
                 onChange={(evento) => actualizar("correo", evento.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="etiqueta-campo">Usuario</label>
-              <input
-                className="campo-entrada"
-                value={datos.usuario}
-                onChange={(evento) => actualizar("usuario", evento.target.value)}
-                autoComplete="username"
                 required
               />
             </div>

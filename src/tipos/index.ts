@@ -25,7 +25,6 @@ export interface Usuario {
   nombre: string;
   apellido: string;
   correo: string;
-  usuario: string;
   activo: boolean;
   fecha_creacion: string;
   fecha_actualizacion: string;
@@ -112,7 +111,6 @@ export interface Indicadores {
   cok_mensual: number;
   van: number;
   tir_mensual: number | null;
-  tir_anual: number | null;
   tcea: number | null;
   total_intereses: number;
   total_amortizado: number;

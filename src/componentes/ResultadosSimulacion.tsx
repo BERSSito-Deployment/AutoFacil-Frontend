@@ -67,7 +67,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
           {equivalente(indicadores.cuota_mensual) && (
             <p className="text-xs text-slate-400">{equivalente(indicadores.cuota_mensual)}</p>
           )}
-          <div className="mt-4 border border-slate-200 bg-slate-50 p-3">
+          <div className="mt-4 border-t border-slate-200 pt-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Cuota final
             </p>
@@ -98,9 +98,9 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
           <p className="mt-1 text-3xl font-bold text-acento-700">
             {formatoPorcentaje(indicadores.tcea)}
           </p>
-          <div className="mt-4 border border-slate-200 bg-slate-50 p-3">
+          <div className="mt-4 border-t border-slate-200 pt-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              TEA equivalente
+              TEA
             </p>
             <p className="mt-1 text-xl font-bold text-slate-900">
               {formatoPorcentaje(indicadores.tea_equivalente)}
@@ -146,6 +146,11 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
           />
           <FilaCosto etiqueta="Intereses totales" valor={formatoMoneda(indicadores.total_intereses, moneda)} />
           <FilaCosto
+            etiqueta="Amortización del capital"
+            valor={formatoMoneda(indicadores.total_amortizado, moneda)}
+            ayuda="Amortizacion"
+          />
+          <FilaCosto
             etiqueta="Seguro de desgravamen"
             valor={formatoMoneda(indicadores.total_seguro_desgravamen, moneda)}
             ayuda="Seguro de desgravamen"
@@ -184,14 +189,30 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
 
       {/* Indicadores complementarios. */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Indicador titulo="TEM (mensual)" valor={formatoPorcentaje(indicadores.tem)} ayuda="TEM" />
+        <Indicador
+          titulo="Tasa efectiva mensual (TEM)"
+          valor={formatoPorcentaje(indicadores.tem)}
+          ayuda="TEM"
+        />
         <Indicador titulo="N° de cuotas" valor={`${indicadores.numero_cuotas}`} />
-        <Indicador titulo="COK anual" valor={formatoPorcentaje(indicadores.cok_anual)} ayuda="COK" />
-        <Indicador titulo="COK mensual" valor={formatoPorcentaje(indicadores.cok_mensual)} ayuda="COK" />
+        <Indicador
+          titulo="% seguro desgrav. por periodo"
+          valor={formatoPorcentaje(indicadores.seguro_desgravamen_mensual)}
+          ayuda="Seguro de desgravamen"
+        />
+        <Indicador
+          titulo="Seguro riesgo"
+          valor={formatoMoneda(indicadores.seguro_riesgo_periodico, moneda)}
+          ayuda="Seguro vehicular"
+        />
+        <Indicador titulo="COK" valor={formatoPorcentaje(indicadores.cok_anual)} ayuda="COK" />
+        <Indicador
+          titulo="Tasa de descuento (COKi)"
+          valor={formatoPorcentaje(indicadores.cok_mensual)}
+          ayuda="COK"
+        />
         <Indicador titulo="VAN" valor={formatoMoneda(indicadores.van, moneda)} ayuda="VAN" />
-        <Indicador titulo="TIR mensual" valor={formatoPorcentaje(indicadores.tir_mensual)} ayuda="TIR" />
-        <Indicador titulo="TIR anual" valor={formatoPorcentaje(indicadores.tir_anual)} ayuda="TIR" />
-        <Indicador titulo="Cuota final" valor={formatoMoneda(indicadores.cuota_final, moneda)} ayuda="Cuota balon" />
+        <Indicador titulo="TIR" valor={formatoPorcentaje(indicadores.tir_mensual)} ayuda="TIR" />
       </div>
 
       {/* Cronograma de pagos completo (replica el modelo del Excel). */}
@@ -200,8 +221,8 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
           <div>
             <h3 className="text-sm font-bold text-slate-800">Cronograma de pagos</h3>
             <p className="text-xs text-slate-500">
-              Método francés vencido, meses comerciales de 30 días. Incluye el cronograma del cuota final
-              (cuota final diferida) y el de la cuota regular. Importes en {moneda === "USD" ? "US$" : "S/"}.
+              Método francés vencido, meses comerciales de 30 días. Incluye el cronograma de la cuota
+              final diferida y el de la cuota regular. Importes en {moneda === "USD" ? "US$" : "S/"}.
             </p>
           </div>
         </div>
