@@ -47,7 +47,7 @@ export function Layout() {
     <div className="flex h-screen overflow-hidden bg-slate-50">
       <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-white md:flex">
         <div className="flex items-center gap-2.5 px-5 py-5">
-          <img src="/logo.png" alt="AutoFácil" className="h-9 w-9 object-contain" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="AutoFácil" className="h-9 w-9 object-contain" />
           <span className="font-display text-xl font-semibold tracking-tight text-slate-900">
             AutoFácil
           </span>

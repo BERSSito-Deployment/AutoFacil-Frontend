@@ -57,7 +57,7 @@ export function Registro() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
-          <img src="/logo.png" alt="AutoFácil" className="h-14 w-14 object-contain" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="AutoFácil" className="h-14 w-14 object-contain" />
           <h1 className="mt-2 font-display text-2xl font-bold text-slate-900">AutoFácil</h1>
         </div>
 
