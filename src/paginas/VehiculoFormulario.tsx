@@ -5,7 +5,7 @@ import { Campo } from "../componentes/Campo";
 import { Cargando } from "../componentes/Cargando";
 import { Mensaje } from "../componentes/Mensaje";
 import { mensajeError } from "../api/cliente";
-import { actualizarVehiculo, crearVehiculo, obtenerVehiculo } from "../api/servicios";
+import { actualizarVehiculo, crearVehiculo, obtenerTipoCambio, obtenerVehiculo } from "../api/servicios";
 import type { Moneda, Vehiculo } from "../tipos";
 import { ETIQUETA_MONEDA } from "../utilidades/formato";
 
@@ -26,6 +26,10 @@ const VALOR_INICIAL: FormularioVehiculo = {
   url_imagen: "",
 };
 
+function redondearMonto(valor: number): number {
+  return Math.round(valor * 100) / 100;
+}
+
 export function VehiculoFormulario() {
   const { id } = useParams();
   const editando = Boolean(id);
@@ -34,6 +38,7 @@ export function VehiculoFormulario() {
   const [datos, setDatos] = useState<FormularioVehiculo>(VALOR_INICIAL);
   const [cargando, setCargando] = useState(editando);
   const [guardando, setGuardando] = useState(false);
+  const [convirtiendo, setConvirtiendo] = useState(false);
   const [error, setError] = useState("");
   const [errorImagen, setErrorImagen] = useState(false);
 
@@ -64,6 +69,32 @@ export function VehiculoFormulario() {
       setErrorImagen(false);
     }
     setDatos((anterior) => ({ ...anterior, [campo]: valor }));
+  };
+
+  const convertirPrecio = async (monedaDestino: Moneda) => {
+    if (datos.moneda === monedaDestino) {
+      return;
+    }
+    if (datos.precio <= 0) {
+      setError("Ingresa un precio válido antes de convertir.");
+      return;
+    }
+
+    setConvirtiendo(true);
+    setError("");
+    try {
+      const tipoCambio = await obtenerTipoCambio("USD", "PEN");
+      const factor = monedaDestino === "USD" ? 1 / tipoCambio.tasa : tipoCambio.tasa;
+      setDatos((anterior) => ({
+        ...anterior,
+        moneda: monedaDestino,
+        precio: redondearMonto(anterior.precio * factor),
+      }));
+    } catch {
+      setError("No se pudo obtener el tipo de cambio para convertir el precio.");
+    } finally {
+      setConvirtiendo(false);
+    }
   };
 
   const enviar = async (evento: React.FormEvent) => {
@@ -172,6 +203,24 @@ export function VehiculoFormulario() {
                 </option>
               ))}
             </select>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="boton-secundario px-3 py-1.5 text-xs"
+                onClick={() => convertirPrecio("USD")}
+                disabled={convirtiendo || datos.moneda === "USD"}
+              >
+                Convertir precio a US$
+              </button>
+              <button
+                type="button"
+                className="boton-secundario px-3 py-1.5 text-xs"
+                onClick={() => convertirPrecio("PEN")}
+                disabled={convirtiendo || datos.moneda === "PEN"}
+              >
+                Convertir precio a S/
+              </button>
+            </div>
           </Campo>
         </div>
 
