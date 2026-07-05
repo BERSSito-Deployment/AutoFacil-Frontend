@@ -131,7 +131,7 @@ export function SimulacionDetalle() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{etiquetaSimulacion(simulacion.id)}</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{etiquetaSimulacion(simulacion.codigo)}</h1>
           {simulacion.nombre && (
             <p className="text-sm font-medium text-slate-600">{simulacion.nombre}</p>
           )}
@@ -227,11 +227,11 @@ export function SimulacionDetalle() {
               valor={ETIQUETA_CAPITALIZACION[simulacion.capitalizacion] ?? simulacion.capitalizacion}
             />
           )}
-          <Dato etiqueta="TEA equivalente" valor={formatoPorcentaje(simulacion.tea_equivalente)} />
+          <Dato etiqueta="TEA" valor={formatoPorcentaje(simulacion.tea_equivalente)} />
           <Dato etiqueta="TEM" valor={formatoPorcentaje(simulacion.tem)} />
           <Dato etiqueta="Gracia" valor={gracia} />
-          <Dato etiqueta="COK anual" valor={formatoPorcentaje(simulacion.cok_anual)} />
-          <Dato etiqueta="COK mensual" valor={formatoPorcentaje(simulacion.cok_mensual)} />
+          <Dato etiqueta="COK" valor={formatoPorcentaje(simulacion.cok_anual)} />
+          <Dato etiqueta="Tasa de descuento (COKi)" valor={formatoPorcentaje(simulacion.cok_mensual)} />
           <Dato
             etiqueta="Seguro desgravamen (mensual)"
             valor={formatoPorcentaje(simulacion.seguro_desgravamen_mensual)}

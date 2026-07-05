@@ -10,7 +10,7 @@ interface ValorContextoAutenticacion {
   usuario: Usuario | null;
   cargando: boolean;
   autenticado: boolean;
-  entrar: (usuario: string, password: string) => Promise<void>;
+  entrar: (correo: string, password: string) => Promise<void>;
   registrar: (datos: DatosRegistro) => Promise<void>;
   refrescar: () => Promise<void>;
   salir: () => void;
@@ -37,8 +37,8 @@ export function ProveedorAutenticacion({ children }: { children: ReactNode }) {
       .finally(() => setCargando(false));
   }, []);
 
-  const entrar = useCallback(async (nombreUsuario: string, password: string) => {
-    const token = await iniciarSesion(nombreUsuario, password);
+  const entrar = useCallback(async (correo: string, password: string) => {
+    const token = await iniciarSesion(correo, password);
     localStorage.setItem(CLAVE_TOKEN, token);
     const perfil = await obtenerPerfil();
     setUsuario(perfil);

@@ -47,21 +47,23 @@ interface FormularioSimulacion {
   porcentaje_cuota_final: number;
   meses_gracia_total: number;
   meses_gracia_parcial: number;
-  costo_notarial: number;
+  // Los montos y porcentajes opcionales se guardan como texto para que el campo
+  // acepte cualquier valor escrito (0, 0.049, vacio); se convierten al calcular.
+  costo_notarial: string;
   costo_notarial_financiado: boolean;
-  costo_registral: number;
+  costo_registral: string;
   costo_registral_financiado: boolean;
-  costo_tasacion: number;
+  costo_tasacion: string;
   costo_tasacion_financiado: boolean;
-  comision_estudio: number;
+  comision_estudio: string;
   comision_estudio_financiado: boolean;
-  comision_activacion: number;
+  comision_activacion: string;
   comision_activacion_financiado: boolean;
-  gps_periodico: number;
-  portes_periodico: number;
-  gastos_adm_periodico: number;
-  seguro_desgravamen_mensual: number;
-  seguro_riesgo_anual: number;
+  gps_periodico: string;
+  portes_periodico: string;
+  gastos_adm_periodico: string;
+  seguro_desgravamen_mensual: string;
+  seguro_riesgo_anual: string;
   cok_anual: number;
   actualizar_precio: boolean;
   fecha_inicio: string;
@@ -82,21 +84,21 @@ const VALOR_INICIAL: FormularioSimulacion = {
   porcentaje_cuota_final: 40,
   meses_gracia_total: 0,
   meses_gracia_parcial: 0,
-  costo_notarial: 0,
+  costo_notarial: "",
   costo_notarial_financiado: true,
-  costo_registral: 0,
+  costo_registral: "",
   costo_registral_financiado: true,
-  costo_tasacion: 0,
+  costo_tasacion: "",
   costo_tasacion_financiado: true,
-  comision_estudio: 0,
+  comision_estudio: "",
   comision_estudio_financiado: true,
-  comision_activacion: 0,
+  comision_activacion: "",
   comision_activacion_financiado: true,
-  gps_periodico: 0,
-  portes_periodico: 0,
-  gastos_adm_periodico: 0,
-  seguro_desgravamen_mensual: 0,
-  seguro_riesgo_anual: 0,
+  gps_periodico: "",
+  portes_periodico: "",
+  gastos_adm_periodico: "",
+  seguro_desgravamen_mensual: "",
+  seguro_riesgo_anual: "",
   cok_anual: 20,
   actualizar_precio: false,
   fecha_inicio: "",
@@ -115,6 +117,11 @@ const CAPITALIZACIONES: Capitalizacion[] = [
 
 // Cuota final sugerida por cada plan (el personalizado conserva la que este puesta).
 const CUOTA_FINAL_POR_PLAN: Record<string, number> = { PLAN_24: 50, PLAN_36: 40 };
+
+// Muestra un numero guardado como texto de campo (vacio cuando es cero).
+function aTexto(valor: number): string {
+  return valor === 0 ? "" : String(valor);
+}
 
 // Encabezado de paso con un numero en circulo, para guiar el formulario.
 function Paso({ numero, titulo }: { numero: number; titulo: string }) {
@@ -139,9 +146,9 @@ function CostoInicialCampo({
 }: {
   etiqueta: string;
   descripcion: string;
-  monto: number;
+  monto: string;
   financiado: boolean;
-  onMonto: (valor: number) => void;
+  onMonto: (valor: string) => void;
   onModalidad: (financiado: boolean) => void;
 }) {
   return (
@@ -151,8 +158,9 @@ function CostoInicialCampo({
         type="number"
         step="0.01"
         min="0"
+        placeholder="0"
         value={monto}
-        onChange={(evento) => onMonto(Number(evento.target.value))}
+        onChange={(evento) => onMonto(evento.target.value)}
       />
       <div className="mt-2 inline-flex overflow-hidden rounded-md border border-slate-300 text-xs">
         <button
@@ -244,21 +252,21 @@ export function NuevaSimulacion() {
           dias_anio: simulacion.dias_anio,
           meses_gracia_total: simulacion.meses_gracia_total,
           meses_gracia_parcial: simulacion.meses_gracia_parcial,
-          costo_notarial: simulacion.costo_notarial,
+          costo_notarial: aTexto(simulacion.costo_notarial),
           costo_notarial_financiado: simulacion.costo_notarial_financiado,
-          costo_registral: simulacion.costo_registral,
+          costo_registral: aTexto(simulacion.costo_registral),
           costo_registral_financiado: simulacion.costo_registral_financiado,
-          costo_tasacion: simulacion.costo_tasacion,
+          costo_tasacion: aTexto(simulacion.costo_tasacion),
           costo_tasacion_financiado: simulacion.costo_tasacion_financiado,
-          comision_estudio: simulacion.comision_estudio,
+          comision_estudio: aTexto(simulacion.comision_estudio),
           comision_estudio_financiado: simulacion.comision_estudio_financiado,
-          comision_activacion: simulacion.comision_activacion,
+          comision_activacion: aTexto(simulacion.comision_activacion),
           comision_activacion_financiado: simulacion.comision_activacion_financiado,
-          gps_periodico: simulacion.gps_periodico,
-          portes_periodico: simulacion.portes_periodico,
-          gastos_adm_periodico: simulacion.gastos_adm_periodico,
-          seguro_desgravamen_mensual: decimalAPorcentaje(simulacion.seguro_desgravamen_mensual),
-          seguro_riesgo_anual: decimalAPorcentaje(simulacion.seguro_riesgo_anual),
+          gps_periodico: aTexto(simulacion.gps_periodico),
+          portes_periodico: aTexto(simulacion.portes_periodico),
+          gastos_adm_periodico: aTexto(simulacion.gastos_adm_periodico),
+          seguro_desgravamen_mensual: aTexto(decimalAPorcentaje(simulacion.seguro_desgravamen_mensual)),
+          seguro_riesgo_anual: aTexto(decimalAPorcentaje(simulacion.seguro_riesgo_anual)),
           cok_anual: decimalAPorcentaje(simulacion.cok_anual),
           actualizar_precio: false,
           fecha_inicio: simulacion.fecha_inicio,
@@ -415,21 +423,21 @@ export function NuevaSimulacion() {
     capitalizacion: datos.tipo_tasa === "NOMINAL" ? (datos.capitalizacion as Capitalizacion) : null,
     meses_gracia_total: datos.meses_gracia_total,
     meses_gracia_parcial: datos.meses_gracia_parcial,
-    costo_notarial: datos.costo_notarial,
+    costo_notarial: Number(datos.costo_notarial) || 0,
     costo_notarial_financiado: datos.costo_notarial_financiado,
-    costo_registral: datos.costo_registral,
+    costo_registral: Number(datos.costo_registral) || 0,
     costo_registral_financiado: datos.costo_registral_financiado,
-    costo_tasacion: datos.costo_tasacion,
+    costo_tasacion: Number(datos.costo_tasacion) || 0,
     costo_tasacion_financiado: datos.costo_tasacion_financiado,
-    comision_estudio: datos.comision_estudio,
+    comision_estudio: Number(datos.comision_estudio) || 0,
     comision_estudio_financiado: datos.comision_estudio_financiado,
-    comision_activacion: datos.comision_activacion,
+    comision_activacion: Number(datos.comision_activacion) || 0,
     comision_activacion_financiado: datos.comision_activacion_financiado,
-    gps_periodico: datos.gps_periodico,
-    portes_periodico: datos.portes_periodico,
-    gastos_adm_periodico: datos.gastos_adm_periodico,
-    seguro_desgravamen_mensual: porcentajeADecimal(datos.seguro_desgravamen_mensual),
-    seguro_riesgo_anual: porcentajeADecimal(datos.seguro_riesgo_anual),
+    gps_periodico: Number(datos.gps_periodico) || 0,
+    portes_periodico: Number(datos.portes_periodico) || 0,
+    gastos_adm_periodico: Number(datos.gastos_adm_periodico) || 0,
+    seguro_desgravamen_mensual: porcentajeADecimal(Number(datos.seguro_desgravamen_mensual) || 0),
+    seguro_riesgo_anual: porcentajeADecimal(Number(datos.seguro_riesgo_anual) || 0),
     cok_anual: porcentajeADecimal(datos.cok_anual),
     fecha_inicio: datos.fecha_inicio || null,
   });
@@ -517,7 +525,7 @@ export function NuevaSimulacion() {
               ))}
             </select>
           </Campo>
-          <Campo etiqueta="Nombre de la simulación" descripcion="Etiqueta para reconocer esta simulación (por ejemplo: Compra Inteligente Plan 36). Es opcional.">
+          <Campo etiqueta="Nombre de la simulación" descripcion="Etiqueta para reconocer esta simulación en tu historial. Es opcional.">
             <input
               className="campo-entrada"
               value={datos.nombre}
@@ -689,7 +697,7 @@ export function NuevaSimulacion() {
         </div>
 
         {(requiereTipoCambio || monedaCredito === "USD") && (
-          <div className="rounded-md border border-marca-100 bg-marca-50/60 p-4">
+          <div className="border-t border-slate-200 pt-4">
             {requiereTipoCambio && (
               <p className="mb-3 text-xs text-slate-600">
                 El vehículo está en {ETIQUETA_MONEDA[monedaVehiculo]} y el crédito en{" "}
@@ -857,17 +865,17 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Seguro de desgravamen (% mensual)"
             ayuda="Seguro de desgravamen"
-            descripcion="Tasa mensual del seguro de desgravamen, aplicada sobre el saldo. Va incluida en la cuota. Es un porcentaje, por ejemplo 0.049 (= 0.049%)."
+            descripcion="Tasa mensual del seguro de desgravamen, aplicada sobre el saldo. Va incluida en la cuota. Se ingresa como porcentaje."
           >
             <input
               className="campo-entrada"
               type="number"
               step="0.0001"
               min="0"
-              placeholder="Ej: 0.049"
+              placeholder="0"
               value={datos.seguro_desgravamen_mensual}
               onChange={(evento) =>
-                actualizar("seguro_desgravamen_mensual", Number(evento.target.value))
+                actualizar("seguro_desgravamen_mensual", evento.target.value)
               }
             />
             <p className="mt-1 text-xs text-slate-500">Porcentaje mensual sobre el saldo.</p>
@@ -875,21 +883,21 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Seguro contra todo riesgo (% anual)"
             ayuda="Seguro vehicular"
-            descripcion="Tasa anual del seguro vehicular sobre el precio del vehículo. Es un porcentaje, por ejemplo 0.30 (= 0.30%). Se prorratea por cuota."
+            descripcion="Tasa anual del seguro vehicular sobre el precio del vehículo. Se ingresa como porcentaje y se reparte entre las cuotas."
           >
             <input
               className="campo-entrada"
               type="number"
               step="0.0001"
               min="0"
-              placeholder="Ej: 0.30"
+              placeholder="0"
               value={datos.seguro_riesgo_anual}
-              onChange={(evento) => actualizar("seguro_riesgo_anual", Number(evento.target.value))}
+              onChange={(evento) => actualizar("seguro_riesgo_anual", evento.target.value)}
             />
             <p className="mt-1 text-xs text-slate-500">
-              {precioCredito > 0 && datos.seguro_riesgo_anual > 0
+              {precioCredito > 0 && Number(datos.seguro_riesgo_anual) > 0
                 ? `≈ ${formatoMoneda(
-                    (datos.seguro_riesgo_anual / 100) * precioCredito / 12,
+                    (Number(datos.seguro_riesgo_anual) / 100) * precioCredito / 12,
                     monedaCredito
                   )} por cuota`
                 : "Porcentaje anual sobre el precio del vehículo."}
@@ -912,13 +920,13 @@ export function NuevaSimulacion() {
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="Ej: 20"
+                placeholder="0"
                 value={datos.gps_periodico}
-                onChange={(evento) => actualizar("gps_periodico", Number(evento.target.value))}
+                onChange={(evento) => actualizar("gps_periodico", evento.target.value)}
               />
               <p className="mt-1 text-xs text-slate-500">
-                {datos.gps_periodico > 0
-                  ? `× ${numeroCuotas + 1} = ${formatoMoneda(datos.gps_periodico * (numeroCuotas + 1), monedaCredito)} en total`
+                {Number(datos.gps_periodico) > 0
+                  ? `× ${numeroCuotas + 1} = ${formatoMoneda(Number(datos.gps_periodico) * (numeroCuotas + 1), monedaCredito)} en total`
                   : "Monto por cada cuota."}
               </p>
             </Campo>
@@ -928,13 +936,13 @@ export function NuevaSimulacion() {
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="Ej: 3.50"
+                placeholder="0"
                 value={datos.portes_periodico}
-                onChange={(evento) => actualizar("portes_periodico", Number(evento.target.value))}
+                onChange={(evento) => actualizar("portes_periodico", evento.target.value)}
               />
               <p className="mt-1 text-xs text-slate-500">
-                {datos.portes_periodico > 0
-                  ? `× ${numeroCuotas + 1} = ${formatoMoneda(datos.portes_periodico * (numeroCuotas + 1), monedaCredito)} en total`
+                {Number(datos.portes_periodico) > 0
+                  ? `× ${numeroCuotas + 1} = ${formatoMoneda(Number(datos.portes_periodico) * (numeroCuotas + 1), monedaCredito)} en total`
                   : "Monto por cada cuota."}
               </p>
             </Campo>
@@ -944,13 +952,13 @@ export function NuevaSimulacion() {
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="Ej: 3.50"
+                placeholder="0"
                 value={datos.gastos_adm_periodico}
-                onChange={(evento) => actualizar("gastos_adm_periodico", Number(evento.target.value))}
+                onChange={(evento) => actualizar("gastos_adm_periodico", evento.target.value)}
               />
               <p className="mt-1 text-xs text-slate-500">
-                {datos.gastos_adm_periodico > 0
-                  ? `× ${numeroCuotas + 1} = ${formatoMoneda(datos.gastos_adm_periodico * (numeroCuotas + 1), monedaCredito)} en total`
+                {Number(datos.gastos_adm_periodico) > 0
+                  ? `× ${numeroCuotas + 1} = ${formatoMoneda(Number(datos.gastos_adm_periodico) * (numeroCuotas + 1), monedaCredito)} en total`
                   : "Monto por cada cuota."}
               </p>
             </Campo>
@@ -963,9 +971,9 @@ export function NuevaSimulacion() {
             Costos / gastos iniciales
           </p>
           <p className="mb-3 text-xs text-slate-500">
-            Marca cada uno como Financiado (se suma al préstamo y
-            se paga en las cuotas) o Al contado (lo pagas
-            aparte). Déjalos en 0 si no aplican.
+            Si eliges Financiado, el monto se suma al préstamo.
+            Si lo pagarás por separado, selecciona Al contado. Si no aplica,
+            déjalo en 0.
           </p>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <CostoInicialCampo

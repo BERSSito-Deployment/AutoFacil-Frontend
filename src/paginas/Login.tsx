@@ -9,7 +9,7 @@ import { mensajeError } from "../api/cliente";
 export function Login() {
   const { entrar, autenticado } = useAutenticacion();
   const navegar = useNavigate();
-  const [usuario, setUsuario] = useState("");
+  const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -25,7 +25,7 @@ export function Login() {
     setError("");
     setEnviando(true);
     try {
-      await entrar(usuario.trim(), password);
+      await entrar(correo.trim(), password);
       navegar("/", { replace: true });
     } catch (err) {
       setError(mensajeError(err, "No se pudo iniciar sesión."));
@@ -46,12 +46,13 @@ export function Login() {
           <h2 className="text-lg font-bold text-slate-900">Inicia sesión</h2>
           <form onSubmit={enviar} className="mt-5 space-y-4">
             <div>
-              <label className="etiqueta-campo">Usuario o correo</label>
+              <label className="etiqueta-campo">Correo</label>
               <input
                 className="campo-entrada"
-                value={usuario}
-                onChange={(evento) => setUsuario(evento.target.value)}
-                autoComplete="username"
+                type="email"
+                value={correo}
+                onChange={(evento) => setCorreo(evento.target.value)}
+                autoComplete="email"
                 required
               />
             </div>
@@ -76,13 +77,8 @@ export function Login() {
         <p className="mt-5 text-center text-sm text-slate-500">
           ¿No tienes una cuenta?{" "}
           <Link to="/registro" className="font-semibold text-marca-700 hover:underline">
-            Crea una gratis
+            Crea tu cuenta
           </Link>
-        </p>
-
-        <p className="mt-4 text-center text-xs text-slate-400">
-          Cuenta de prueba: <span className="font-medium text-slate-500">demo</span> /{" "}
-          <span className="font-medium text-slate-500">Demo1234</span>
         </p>
       </div>
     </div>
