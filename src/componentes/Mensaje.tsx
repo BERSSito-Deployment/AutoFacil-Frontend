@@ -1,4 +1,3 @@
-// Cuadro de mensaje para errores, exitos o avisos informativos.
 type TipoMensaje = "error" | "exito" | "info";
 
 const CLASES: Record<TipoMensaje, string> = {

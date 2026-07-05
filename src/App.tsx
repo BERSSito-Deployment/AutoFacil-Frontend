@@ -1,4 +1,3 @@
-// Definicion de rutas: publicas (login, registro) y privadas.
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./componentes/Layout";
 import { RutaProtegida } from "./componentes/RutaProtegida";
@@ -24,7 +23,7 @@ export function App() {
         }
       >
         <Route path="/" element={<Dashboard />} />
-        {/* El catalogo vive en la pantalla de inicio ("/"). */}
+        {}
         <Route path="/vehiculos" element={<Navigate to="/" replace />} />
         <Route path="/vehiculos/nuevo" element={<VehiculoFormulario />} />
         <Route path="/vehiculos/:id" element={<VehiculoFormulario />} />

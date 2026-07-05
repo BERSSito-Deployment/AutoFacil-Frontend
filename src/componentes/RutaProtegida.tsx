@@ -1,4 +1,3 @@
-// Envuelve rutas privadas: redirige al login si no hay sesion activa.
 import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAutenticacion } from "../contexto/ContextoAutenticacion";

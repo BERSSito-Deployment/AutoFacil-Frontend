@@ -1,11 +1,10 @@
-// Detalle de una simulacion: datos, indicadores, cronograma y acciones.
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Cargando } from "../componentes/Cargando";
 import { Mensaje } from "../componentes/Mensaje";
 import { ResultadosSimulacion } from "../componentes/ResultadosSimulacion";
 import { mensajeError } from "../api/cliente";
-import { archivarSimulacion, obtenerSimulacion, recalcularSimulacion } from "../api/servicios";
+import { eliminarSimulacion, obtenerSimulacion, recalcularSimulacion } from "../api/servicios";
 import type { Simulacion } from "../tipos";
 import {
   ETIQUETA_CAPITALIZACION,
@@ -16,7 +15,6 @@ import {
   formatoPorcentaje,
 } from "../utilidades/formato";
 
-// Muestra un par etiqueta/valor dentro de la cuadricula de parametros.
 function Dato({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
     <div>
@@ -50,7 +48,6 @@ export function SimulacionDetalle() {
 
   useEffect(() => {
     cargar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const recalcular = async () => {
@@ -78,7 +75,7 @@ export function SimulacionDetalle() {
     setError("");
     setMensajeOk("");
     try {
-      await archivarSimulacion(Number(id));
+      await eliminarSimulacion(Number(id));
       navegar("/simulaciones");
     } catch (err) {
       setError(mensajeError(err));
@@ -92,7 +89,6 @@ export function SimulacionDetalle() {
     return <Mensaje tipo="error">{error || "No se encontró la simulación."}</Mensaje>;
   }
 
-  const archivada = simulacion.estado === "ARCHIVADA";
   const moneda = simulacion.moneda;
   const gracia =
     simulacion.meses_gracia_total === 0 && simulacion.meses_gracia_parcial === 0
@@ -147,11 +143,9 @@ export function SimulacionDetalle() {
           <button type="button" className="boton-secundario" onClick={recalcular}>
             Recalcular
           </button>
-          {!archivada && (
-            <button type="button" className="boton-secundario text-red-600" onClick={eliminar}>
-              Eliminar
-            </button>
-          )}
+          <button type="button" className="boton-secundario text-red-600" onClick={eliminar}>
+            Eliminar
+          </button>
         </div>
       </div>
 

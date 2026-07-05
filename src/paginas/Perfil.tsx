@@ -1,4 +1,3 @@
-// Pagina de perfil del usuario: ver y actualizar sus datos y contrasena.
 import { useState } from "react";
 import { Campo } from "../componentes/Campo";
 import { Mensaje } from "../componentes/Mensaje";

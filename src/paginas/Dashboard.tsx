@@ -1,4 +1,3 @@
-// Pantalla de inicio: los vehiculos del usuario para elegir cual simular.
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
@@ -6,7 +5,7 @@ import { Cargando } from "../componentes/Cargando";
 import { Mensaje } from "../componentes/Mensaje";
 import { VehiculoCard } from "../componentes/VehiculoCard";
 import { mensajeError } from "../api/cliente";
-import { desactivarVehiculo, listarVehiculos } from "../api/servicios";
+import { quitarVehiculo as quitarVehiculoServicio, listarVehiculos } from "../api/servicios";
 import type { Vehiculo } from "../tipos";
 
 export function Dashboard() {
@@ -28,11 +27,11 @@ export function Dashboard() {
   }, []);
 
   const quitarVehiculo = async (vehiculo: Vehiculo) => {
-    if (!window.confirm(`¿Dar de baja el ${vehiculo.marca} ${vehiculo.modelo} del catálogo?`)) {
+    if (!window.confirm(`¿Quitar el ${vehiculo.marca} ${vehiculo.modelo} del catálogo?`)) {
       return;
     }
     try {
-      await desactivarVehiculo(vehiculo.id);
+      await quitarVehiculoServicio(vehiculo.id);
       await cargarVehiculos(busqueda);
     } catch (err) {
       setError(mensajeError(err));
@@ -45,7 +44,7 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Encabezado: el catalogo es el protagonista. */}
+      {}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Mis vehículos</h1>
@@ -63,7 +62,7 @@ export function Dashboard() {
 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
 
-      {/* Buscador del catalogo. */}
+      {}
       <form
         onSubmit={(evento) => {
           evento.preventDefault();
@@ -94,7 +93,7 @@ export function Dashboard() {
               key={vehiculo.id}
               vehiculo={vehiculo}
               gestion
-              onDesactivar={quitarVehiculo}
+              onQuitar={quitarVehiculo}
             />
           ))}
         </div>

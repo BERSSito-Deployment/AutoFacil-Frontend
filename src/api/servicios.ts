@@ -1,4 +1,3 @@
-// Funciones de acceso a los endpoints del backend agrupadas por dominio.
 import { clienteHttp } from "./cliente";
 import type {
   ResultadoCalculo,
@@ -9,10 +8,8 @@ import type {
   TipoCambio,
   Usuario,
   Vehiculo,
-  EstadoSimulacion,
 } from "../tipos";
 
-// --- Autenticacion ---
 export async function iniciarSesion(correo: string, password: string): Promise<string> {
   const respuesta = await clienteHttp.post<{ access_token: string }>("/auth/login-json", {
     correo,
@@ -51,15 +48,10 @@ export async function actualizarPerfil(datos: DatosPerfil): Promise<Usuario> {
   return respuesta.data;
 }
 
-// --- Vehiculos ---
-export async function listarVehiculos(
-  busqueda?: string,
-  incluirInactivos = false
-): Promise<Vehiculo[]> {
+export async function listarVehiculos(busqueda?: string): Promise<Vehiculo[]> {
   const respuesta = await clienteHttp.get<Vehiculo[]>("/vehiculos", {
     params: {
       busqueda: busqueda || undefined,
-      incluir_inactivos: incluirInactivos || undefined,
     },
   });
   return respuesta.data;
@@ -80,7 +72,7 @@ export async function actualizarVehiculo(id: number, datos: Partial<Vehiculo>): 
   return respuesta.data;
 }
 
-export async function desactivarVehiculo(id: number): Promise<Vehiculo> {
+export async function quitarVehiculo(id: number): Promise<Vehiculo> {
   const respuesta = await clienteHttp.delete<Vehiculo>(`/vehiculos/${id}`);
   return respuesta.data;
 }
@@ -98,7 +90,6 @@ export async function guardarSimulacion(datos: SimulacionGuardar): Promise<Simul
 
 export async function listarSimulaciones(filtros?: {
   vehiculo_id?: number;
-  estado?: EstadoSimulacion;
   busqueda?: string;
 }): Promise<SimulacionListado[]> {
   const respuesta = await clienteHttp.get<SimulacionListado[]>("/simulaciones", {
@@ -125,14 +116,11 @@ export async function recalcularSimulacion(id: number): Promise<Simulacion> {
   return respuesta.data;
 }
 
-// Archivado logico: conserva el registro y su historial, pero la marca como
-// ARCHIVADA. No hay borrado definitivo.
-export async function archivarSimulacion(id: number): Promise<Simulacion> {
+export async function eliminarSimulacion(id: number): Promise<Simulacion> {
   const respuesta = await clienteHttp.delete<Simulacion>(`/simulaciones/${id}`);
   return respuesta.data;
 }
 
-// --- Tipo de cambio en tiempo real ---
 export async function obtenerTipoCambio(
   base = "USD",
   destino = "PEN"

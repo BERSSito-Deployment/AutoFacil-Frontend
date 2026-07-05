@@ -58,7 +58,6 @@
     @apply border-r border-slate-100;
   }
 
-  /* Variante compacta para tablas con muchas columnas (cronograma de pagos). */
   .tabla-compacta th,
   .tabla-compacta td {
     @apply px-2 py-1.5 text-xs;
