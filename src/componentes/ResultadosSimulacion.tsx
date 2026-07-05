@@ -6,7 +6,7 @@ import { AyudaTooltip } from "./AyudaTooltip";
 interface PropiedadesResultados {
   indicadores: Indicadores;
   cronograma: FilaCronograma[];
-  // Tipo de cambio referencial para el equivalente en Soles (creditos en USD).
+  // Tipo de cambio referencial: 1 USD = tipoCambio PEN.
   tipoCambio?: number;
 }
 
@@ -50,8 +50,25 @@ function Indicador({ titulo, valor, ayuda }: { titulo: string; valor: string; ay
 export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: PropiedadesResultados) {
   const moneda: Moneda = indicadores.moneda;
 
-  const equivalente = (valorUsd: number): string | null =>
-    moneda === "USD" && tipoCambio ? `≈ ${formatoMoneda(valorUsd * tipoCambio, "PEN")}` : null;
+  // Lo que realmente se paga cada mes: la cuota del credito (que ya incluye el
+  // desgravamen) mas el seguro de riesgo, GPS, portes y gastos administrativos.
+  const pagoMensual =
+    indicadores.cuota_mensual +
+    indicadores.seguro_riesgo_periodico +
+    indicadores.gps_periodico +
+    indicadores.portes_periodico +
+    indicadores.gastos_adm_periodico;
+
+  // Equivalencia en la otra moneda usando el tipo de cambio referencial.
+  const equivalente = (valor: number): string | null => {
+    if (!tipoCambio) {
+      return null;
+    }
+    if (moneda === "USD") {
+      return `≈ ${formatoMoneda(valor * tipoCambio, "PEN")}`;
+    }
+    return `≈ ${formatoMoneda(valor / tipoCambio, "USD")}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -59,24 +76,35 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="border border-slate-200 bg-white p-5">
           <p className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
-            Cuota mensual <AyudaTooltip termino="Sistema frances" />
+            Pago mensual <AyudaTooltip termino="Pago mensual" />
           </p>
           <p className="mt-1 text-3xl font-bold text-marca-700">
-            {formatoMoneda(indicadores.cuota_mensual, moneda)}
+            {formatoMoneda(pagoMensual, moneda)}
           </p>
-          {equivalente(indicadores.cuota_mensual) && (
-            <p className="text-xs text-slate-400">{equivalente(indicadores.cuota_mensual)}</p>
+          {equivalente(pagoMensual) && (
+            <p className="text-xs text-slate-400">{equivalente(pagoMensual)}</p>
           )}
-          <div className="mt-4 border-t border-slate-200 pt-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Cuota final
-            </p>
-            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900">
-              {formatoMoneda(indicadores.cuota_final, moneda)}
-            </p>
-            <p className="mt-1 text-sm text-slate-600">
-              Se paga en el periodo {indicadores.numero_cuotas + 1}.
-            </p>
+          <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-200 pt-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Cuota del crédito
+              </p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-slate-900">
+                {formatoMoneda(indicadores.cuota_mensual, moneda)}
+              </p>
+              <p className="mt-1 text-sm text-slate-600">Sin los cargos del mes.</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Cuota final
+              </p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-slate-900">
+                {formatoMoneda(indicadores.cuota_final, moneda)}
+              </p>
+              <p className="mt-1 text-sm text-slate-600">
+                En el periodo {indicadores.numero_cuotas + 1}.
+              </p>
+            </div>
           </div>
         </div>
         <div className="border border-slate-200 bg-white p-5">

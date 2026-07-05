@@ -118,9 +118,49 @@ const CAPITALIZACIONES: Capitalizacion[] = [
 // Cuota final sugerida por cada plan (el personalizado conserva la que este puesta).
 const CUOTA_FINAL_POR_PLAN: Record<string, number> = { PLAN_24: 50, PLAN_36: 40 };
 
+type CampoMonto =
+  | "costo_notarial"
+  | "costo_registral"
+  | "costo_tasacion"
+  | "comision_estudio"
+  | "comision_activacion"
+  | "gps_periodico"
+  | "portes_periodico"
+  | "gastos_adm_periodico";
+
+const CAMPOS_MONTO: CampoMonto[] = [
+  "costo_notarial",
+  "costo_registral",
+  "costo_tasacion",
+  "comision_estudio",
+  "comision_activacion",
+  "gps_periodico",
+  "portes_periodico",
+  "gastos_adm_periodico",
+];
+
 // Muestra un numero guardado como texto de campo (vacio cuando es cero).
 function aTexto(valor: number): string {
   return valor === 0 ? "" : String(valor);
+}
+
+function redondearMonto(valor: number): number {
+  return Math.round(valor * 100) / 100;
+}
+
+function aTextoMonto(valor: number): string {
+  return redondearMonto(valor).toFixed(2);
+}
+
+function convertirTextoMonto(valor: string, factor: number): string {
+  if (valor.trim() === "") {
+    return valor;
+  }
+  const numero = Number(valor);
+  if (!Number.isFinite(numero) || numero === 0) {
+    return valor;
+  }
+  return aTextoMonto(numero * factor);
 }
 
 // Encabezado de paso con un numero en circulo, para guiar el formulario.
@@ -202,7 +242,7 @@ export function NuevaSimulacion() {
   const [error, setError] = useState("");
   // La cuota inicial puede ingresarse como % del precio o como monto.
   const [modoCuotaInicial, setModoCuotaInicial] = useState<"porcentaje" | "monto">("porcentaje");
-  // Tipo de cambio en tiempo real (solo informativo, para creditos en Dolares).
+  // Tipo de cambio referencial (1 USD = PEN), usado para convertir y mostrar equivalencias.
   const [tipoCambio, setTipoCambio] = useState<TipoCambio | null>(null);
 
   // Vehiculos del usuario disponibles para simular.
@@ -314,9 +354,6 @@ export function NuevaSimulacion() {
   const simboloMoneda = monedaCredito === "USD" ? "US$" : "S/";
 
   useEffect(() => {
-    if (!requiereTipoCambio) {
-      return;
-    }
     let activo = true;
     obtenerTipoCambio("USD", "PEN")
       .then((tc) => {
@@ -327,7 +364,10 @@ export function NuevaSimulacion() {
         if (!editando) {
           setDatos((anterior) => ({
             ...anterior,
-            tipo_cambio_referencial: Number(tc.tasa.toFixed(4)),
+            tipo_cambio_referencial:
+              anterior.tipo_cambio_referencial === VALOR_INICIAL.tipo_cambio_referencial
+                ? Number(tc.tasa.toFixed(4))
+                : anterior.tipo_cambio_referencial,
           }));
         }
       })
@@ -335,8 +375,7 @@ export function NuevaSimulacion() {
     return () => {
       activo = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requiereTipoCambio]);
+  }, [editando]);
 
   const aplicarTipoCambioEnVivo = async () => {
     try {
@@ -365,6 +404,32 @@ export function NuevaSimulacion() {
       vehiculo_id: vehiculoId,
       moneda: vehiculo ? vehiculo.moneda : anterior.moneda,
     }));
+    setResultado(null);
+  };
+
+  const convertirImportes = (monedaDestino: Moneda) => {
+    if (datos.moneda === monedaDestino) {
+      return;
+    }
+    if (datos.tipo_cambio_referencial <= 0) {
+      setError("Indica un tipo de cambio válido antes de convertir los montos.");
+      return;
+    }
+
+    const factor =
+      monedaDestino === "USD" ? 1 / datos.tipo_cambio_referencial : datos.tipo_cambio_referencial;
+
+    setDatos((anterior) => {
+      const convertido: FormularioSimulacion = {
+        ...anterior,
+        moneda: monedaDestino,
+      };
+      CAMPOS_MONTO.forEach((campo) => {
+        convertido[campo] = convertirTextoMonto(anterior[campo], factor);
+      });
+      return convertido;
+    });
+    setError("");
     setResultado(null);
   };
 
@@ -409,10 +474,9 @@ export function NuevaSimulacion() {
     vehiculo_id: datos.vehiculo_id,
     nombre: datos.nombre.trim() || null,
     moneda: monedaCredito,
-    // Se envia el tipo de cambio cuando la moneda del credito difiere de la del
-    // vehiculo, o cuando el credito es en Dolares (equivalencias informativas).
-    tipo_cambio_referencial:
-      requiereTipoCambio || monedaCredito === "USD" ? datos.tipo_cambio_referencial : null,
+    // El tipo de cambio siempre viaja: convierte el precio cuando las monedas
+    // difieren y sirve para mostrar equivalencias Soles/Dolares en el resultado.
+    tipo_cambio_referencial: datos.tipo_cambio_referencial,
     plan: datos.plan,
     numero_cuotas: datos.plan === "PERSONALIZADO" ? datos.numero_cuotas : null,
     dias_anio: datos.dias_anio,
@@ -497,6 +561,9 @@ export function NuevaSimulacion() {
         <h1 className="text-2xl font-bold text-slate-900">
           {editando ? "Editar simulación" : "Nueva simulación"}
         </h1>
+        <p className="mt-1 text-xs text-slate-400">
+          Basado en el financiamiento vehicular Compra Inteligente del banco Interbank.
+        </p>
       </div>
 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
@@ -581,6 +648,24 @@ export function NuevaSimulacion() {
               <option value="PEN">Soles (PEN)</option>
               <option value="USD">Dólares (USD)</option>
             </select>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="boton-secundario px-3 py-1.5 text-xs"
+                onClick={() => convertirImportes("USD")}
+                disabled={datos.moneda === "USD"}
+              >
+                Convertir montos a US$
+              </button>
+              <button
+                type="button"
+                className="boton-secundario px-3 py-1.5 text-xs"
+                onClick={() => convertirImportes("PEN")}
+                disabled={datos.moneda === "PEN"}
+              >
+                Convertir montos a S/
+              </button>
+            </div>
           </Campo>
           <Campo
             etiqueta="Plan de pagos"
@@ -696,7 +781,7 @@ export function NuevaSimulacion() {
           </Campo>
         </div>
 
-        {(requiereTipoCambio || monedaCredito === "USD") && (
+        {(
           <div className="border-t border-slate-200 pt-4">
             {requiereTipoCambio && (
               <p className="mb-3 text-xs text-slate-600">
@@ -730,7 +815,13 @@ export function NuevaSimulacion() {
                     </span>
                   </p>
                 ) : (
-                  <p className="text-slate-400">Consultando el tipo de cambio...</p>
+                  <p className="text-slate-500">
+                    Tipo de cambio referencial:{" "}
+                    <span className="font-semibold text-slate-900">
+                      1 US$ = S/ {datos.tipo_cambio_referencial.toFixed(4)}
+                    </span>
+                    . Puedes editarlo si usarás otro valor.
+                  </p>
                 )}
                 <button type="button" className="boton-secundario w-fit" onClick={aplicarTipoCambioEnVivo}>
                   Actualizar con la tasa de hoy
@@ -764,8 +855,8 @@ export function NuevaSimulacion() {
                     modoCuotaInicial === "monto" ? "bg-marca-600 text-white" : "bg-white text-slate-600"
                   }`}
                   onClick={() => setModoCuotaInicial("monto")}
-                  disabled={precioVehiculo <= 0}
-                  title={precioVehiculo <= 0 ? "Selecciona un vehículo primero" : undefined}
+                  disabled={precioCredito <= 0}
+                  title={precioCredito <= 0 ? "Selecciona un vehículo primero" : undefined}
                 >
                   {simboloMoneda}
                 </button>
@@ -788,7 +879,7 @@ export function NuevaSimulacion() {
                   type="number"
                   step="0.01"
                   min="0"
-                  max={precioVehiculo}
+                  max={precioCredito}
                   value={Number(montoCuotaInicial.toFixed(2))}
                   onChange={(evento) => cambiarMontoCuotaInicial(Number(evento.target.value))}
                 />
@@ -1043,7 +1134,7 @@ export function NuevaSimulacion() {
           <ResultadosSimulacion
             indicadores={resultado}
             cronograma={resultado.cronograma}
-            tipoCambio={monedaCredito === "USD" ? datos.tipo_cambio_referencial : undefined}
+            tipoCambio={datos.tipo_cambio_referencial > 0 ? datos.tipo_cambio_referencial : undefined}
           />
         </section>
       )}

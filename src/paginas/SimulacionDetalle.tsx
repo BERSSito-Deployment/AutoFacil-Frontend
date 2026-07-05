@@ -178,7 +178,7 @@ export function SimulacionDetalle() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           <Dato etiqueta="Moneda" valor={ETIQUETA_MONEDA[moneda]} />
           <Dato etiqueta="Precio del vehículo" valor={formatoMoneda(simulacion.precio_vehiculo, moneda)} />
-          {moneda === "USD" && simulacion.tipo_cambio_referencial != null && (
+          {simulacion.tipo_cambio_referencial != null && (
             <Dato etiqueta="Tipo de cambio ref." valor={simulacion.tipo_cambio_referencial.toFixed(4)} />
           )}
           <Dato
@@ -268,7 +268,7 @@ export function SimulacionDetalle() {
       <ResultadosSimulacion
         indicadores={simulacion}
         cronograma={simulacion.cronograma}
-        tipoCambio={moneda === "USD" ? simulacion.tipo_cambio_referencial ?? undefined : undefined}
+        tipoCambio={simulacion.tipo_cambio_referencial ?? undefined}
       />
 
       <button type="button" className="boton-secundario" onClick={() => navegar("/simulaciones")}>

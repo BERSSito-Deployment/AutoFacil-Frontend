@@ -38,6 +38,8 @@ export const GLOSARIO: Record<string, string> = {
     "Tasa de interés anual que no incorpora el efecto de la capitalización en su valor.",
   "Tasa efectiva":
     "Tasa de interés que ya incorpora el efecto de la capitalización en el período indicado.",
+  "Pago mensual":
+    "Lo que sale de tu bolsillo cada mes: la cuota del crédito (interés + capital + desgravamen) más el seguro contra todo riesgo, el GPS, los portes y los gastos administrativos.",
   "Cuota inicial":
     "Monto que pagas al inicio; reduce el monto que se financia con el crédito.",
   "Monto financiado":

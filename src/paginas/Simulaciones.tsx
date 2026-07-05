@@ -88,7 +88,7 @@ export function Simulaciones() {
                 <th>Vehículo</th>
                 <th className="text-right">Monto del préstamo</th>
                 <th className="text-right">Cuotas</th>
-                <th className="text-right">Cuota mensual</th>
+                <th className="text-right">Pago mensual</th>
                 <th className="text-right">TCEA</th>
                 <th>Fecha</th>
                 <th className="text-right">Acciones</th>
@@ -114,7 +114,7 @@ export function Simulaciones() {
                   </td>
                   <td className="text-right">{simulacion.numero_cuotas}</td>
                   <td className="text-right">
-                    {formatoMoneda(simulacion.cuota_mensual, simulacion.moneda)}
+                    {formatoMoneda(simulacion.pago_mensual, simulacion.moneda)}
                   </td>
                   <td className="text-right">{formatoPorcentaje(simulacion.tcea)}</td>
                   <td>{formatoFecha(simulacion.fecha_creacion)}</td>

@@ -207,6 +207,8 @@ export interface SimulacionListado {
   monto_prestamo: number;
   numero_cuotas: number;
   cuota_mensual: number;
+  // Cuota + seguros y cargos del mes (lo que realmente se paga).
+  pago_mensual: number;
   tcea: number | null;
   fecha_creacion: string;
 }
