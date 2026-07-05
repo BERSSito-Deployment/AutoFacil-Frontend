@@ -1,4 +1,3 @@
-// Estructura principal: barra lateral y cabecera fijas; solo el contenido scrollea.
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAutenticacion } from "../contexto/ContextoAutenticacion";
 
@@ -82,7 +81,7 @@ export function Layout() {
           </button>
         </header>
 
-        {/* Navegacion compacta para pantallas pequenas. */}
+        {}
         <nav className="flex shrink-0 gap-1 overflow-x-auto border-b border-slate-200 bg-white px-3 py-2 md:hidden">
           {ENLACES.map(({ ruta, etiqueta, activo }) => (
             <Link
@@ -97,7 +96,7 @@ export function Layout() {
           ))}
         </nav>
 
-        {/* Unica zona con scroll: el contenido de la pestana seleccionada. */}
+        {}
         <main className="flex-1 overflow-y-auto px-6 py-8">
           <div className="mx-auto max-w-screen-2xl">
             <Outlet />

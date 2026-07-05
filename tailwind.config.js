@@ -4,7 +4,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Color principal.
         marca: {
           50: "#ecf7f4",
           100: "#cfeae3",

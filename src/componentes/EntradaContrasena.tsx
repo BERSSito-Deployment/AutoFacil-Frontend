@@ -1,4 +1,3 @@
-// Campo de contraseña con boton para mostrar/ocultar el texto.
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 

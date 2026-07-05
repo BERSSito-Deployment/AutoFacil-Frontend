@@ -1,4 +1,3 @@
-// Tarjeta de vehiculo para el catalogo y la gestion del mismo.
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Car } from "lucide-react";
@@ -7,18 +6,16 @@ import { formatoMoneda, imagenVehiculo } from "../utilidades/formato";
 
 interface PropsVehiculoCard {
   vehiculo: Vehiculo;
-  // Muestra acciones de gestion (editar/desactivar) ademas de simular.
   gestion?: boolean;
-  // Se pasa cuando se permite dar de baja el vehiculo del catalogo.
-  onDesactivar?: (vehiculo: Vehiculo) => void;
+  onQuitar?: (vehiculo: Vehiculo) => void;
 }
 
-export function VehiculoCard({ vehiculo, gestion = false, onDesactivar }: PropsVehiculoCard) {
+export function VehiculoCard({ vehiculo, gestion = false, onQuitar }: PropsVehiculoCard) {
   const [errorImagen, setErrorImagen] = useState(false);
 
   return (
     <div className="tarjeta group flex flex-col overflow-hidden">
-      {/* Foto del vehiculo; si no carga, un marcador elegante con la marca. */}
+      {}
       <div className="relative h-44 w-full overflow-hidden">
         {errorImagen ? (
           <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100">
@@ -73,12 +70,12 @@ export function VehiculoCard({ vehiculo, gestion = false, onDesactivar }: PropsV
               <Link to={`/vehiculos/${vehiculo.id}`} className="boton-secundario">
                 Editar
               </Link>
-              {onDesactivar && (
+              {onQuitar && (
                 <button
                   type="button"
                   className="boton-secundario text-red-600"
-                  onClick={() => onDesactivar(vehiculo)}
-                  title="Dar de baja"
+                  onClick={() => onQuitar(vehiculo)}
+                  title="Quitar"
                 >
                   Quitar
                 </button>

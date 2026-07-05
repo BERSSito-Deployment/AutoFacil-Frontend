@@ -1,4 +1,3 @@
-// Formulario de creacion y edicion de vehiculos.
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Campo } from "../componentes/Campo";
@@ -11,7 +10,7 @@ import { ETIQUETA_MONEDA } from "../utilidades/formato";
 
 type FormularioVehiculo = Omit<
   Vehiculo,
-  "id" | "activo" | "fecha_creacion" | "fecha_actualizacion"
+  "id" | "fecha_creacion" | "fecha_actualizacion"
 >;
 
 const VALOR_INICIAL: FormularioVehiculo = {

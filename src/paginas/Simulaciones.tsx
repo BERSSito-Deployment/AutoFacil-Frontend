@@ -1,4 +1,3 @@
-// Historial de simulaciones: listado, busqueda y acceso al detalle.
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ListChecks, Search } from "lucide-react";
@@ -19,10 +18,7 @@ export function Simulaciones() {
     setCargando(true);
     setError("");
     try {
-      // El historial muestra solo las propuestas vigentes (no las archivadas).
-      setSimulaciones(
-        await listarSimulaciones({ busqueda: texto || undefined, estado: "CALCULADA" })
-      );
+      setSimulaciones(await listarSimulaciones({ busqueda: texto || undefined }));
     } catch (err) {
       setError(mensajeError(err));
     } finally {

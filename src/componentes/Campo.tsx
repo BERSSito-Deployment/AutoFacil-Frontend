@@ -1,12 +1,9 @@
-// Envoltorio de campo de formulario con etiqueta y ayuda (tooltip) obligatoria.
 import type { ReactNode } from "react";
 import { AyudaTooltip } from "./AyudaTooltip";
 
 interface PropiedadesCampo {
   etiqueta: string;
-  // Termino del glosario para mostrar la definicion tecnica del concepto.
   ayuda?: string;
-  // Texto de ayuda libre sobre como llenar el campo (cuando no es un termino tecnico).
   descripcion?: string;
   children: ReactNode;
   className?: string;
