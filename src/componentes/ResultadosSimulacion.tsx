@@ -1,4 +1,3 @@
-// Muestra los indicadores financieros, el resumen de costos y el cronograma.
 import type { FilaCronograma, Indicadores, Moneda } from "../tipos";
 import { formatoFecha, formatoMoneda, formatoPorcentaje } from "../utilidades/formato";
 import { AyudaTooltip } from "./AyudaTooltip";
@@ -6,11 +5,9 @@ import { AyudaTooltip } from "./AyudaTooltip";
 interface PropiedadesResultados {
   indicadores: Indicadores;
   cronograma: FilaCronograma[];
-  // Tipo de cambio referencial: 1 USD = tipoCambio PEN.
   tipoCambio?: number;
 }
 
-// Abreviatura del plazo de gracia: T = total, P = parcial, S = sin gracia.
 const PG_ABREV: Record<string, string> = {
   GRACIA_TOTAL: "T",
   GRACIA_PARCIAL: "P",
@@ -18,12 +15,10 @@ const PG_ABREV: Record<string, string> = {
   CUOTA_FINAL: "S",
 };
 
-// Formatea un numero con dos decimales sin simbolo de moneda (para el cronograma).
 function fmt(n: number): string {
   return n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-// Celda de saldo. Celda de egreso en rojo entre parentesis (! para vencer al color base de la tabla).
 function Saldo({ valor }: { valor: number }) {
   return <td className="text-right !text-slate-700">{fmt(valor)}</td>;
 }
@@ -49,9 +44,6 @@ function Indicador({ titulo, valor, ayuda }: { titulo: string; valor: string; ay
 
 export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: PropiedadesResultados) {
   const moneda: Moneda = indicadores.moneda;
-
-  // Lo que realmente se paga cada mes: la cuota del credito (que ya incluye el
-  // desgravamen) mas el seguro de riesgo, GPS, portes y gastos administrativos.
   const pagoMensual =
     indicadores.cuota_mensual +
     indicadores.seguro_riesgo_periodico +
@@ -59,7 +51,6 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
     indicadores.portes_periodico +
     indicadores.gastos_adm_periodico;
 
-  // Equivalencia en la otra moneda usando el tipo de cambio referencial.
   const equivalente = (valor: number): string | null => {
     if (!tipoCambio) {
       return null;
@@ -72,7 +63,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
 
   return (
     <div className="space-y-6">
-      {/* Los tres numeros mas importantes. */}
+      {}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="border border-slate-200 bg-white p-5">
           <p className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -138,7 +129,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
         </div>
       </div>
 
-      {/* Resumen de costos. */}
+      {}
       <div className="tarjeta p-5">
         <h3 className="text-sm font-bold text-slate-800">Resumen de costos</h3>
         <p className="mt-0.5 text-xs text-slate-500">
@@ -215,7 +206,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
         </dl>
       </div>
 
-      {/* Indicadores complementarios. */}
+      {}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Indicador
           titulo="Tasa efectiva mensual (TEM)"
@@ -237,13 +228,13 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
         <Indicador
           titulo="Tasa de descuento (COKi)"
           valor={formatoPorcentaje(indicadores.cok_mensual)}
-          ayuda="COK"
+          ayuda="COKi"
         />
         <Indicador titulo="VAN" valor={formatoMoneda(indicadores.van, moneda)} ayuda="VAN" />
         <Indicador titulo="TIR" valor={formatoPorcentaje(indicadores.tir_mensual)} ayuda="TIR" />
       </div>
 
-      {/* Cronograma de pagos completo (replica el modelo del Excel). */}
+      {}
       <div className="tarjeta overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-5 py-3">
           <div>
@@ -304,7 +295,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
               </tr>
             </thead>
             <tbody>
-              {/* Periodo 0: recibes el monto del prestamo (ingreso). */}
+              {}
               <tr className="bg-emerald-50/50">
                 <td className="text-right !text-slate-500">0</td>
                 <td className="text-center !text-slate-400">—</td>
@@ -331,24 +322,24 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
                       {PG_ABREV[fila.tipo_periodo] ?? "S"}
                     </td>
                     <td className="text-left !text-slate-600">{formatoFecha(fila.fecha_pago)}</td>
-                    {/* Cuotón */}
+                    {}
                     <Saldo valor={fila.saldo_inicial_cuota_final} />
                     <Egreso valor={fila.interes_cuota_final} />
                     <Egreso valor={fila.amortizacion_cuota_final} />
                     <Egreso valor={fila.desgravamen_cuota_final} />
                     <Saldo valor={fila.saldo_final_cuota_final} />
-                    {/* Cuota regular */}
+                    {}
                     <Saldo valor={fila.saldo_inicial} />
                     <Egreso valor={fila.interes} />
                     <Egreso valor={fila.cuota} />
                     <Egreso valor={fila.amortizacion} />
                     <Egreso valor={fila.seguro_desgravamen} />
-                    {/* Costos de operación */}
+                    {}
                     <Egreso valor={fila.seguro_riesgo} />
                     <Egreso valor={fila.gps} />
                     <Egreso valor={fila.portes} />
                     <Egreso valor={fila.gastos_adm} />
-                    {/* Saldo final y flujo */}
+                    {}
                     <Saldo valor={fila.saldo_final} />
                     <Egreso valor={-fila.flujo} />
                   </tr>

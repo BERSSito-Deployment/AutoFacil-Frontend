@@ -1,4 +1,3 @@
-// Formulario de creacion y edicion de vehiculos.
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Campo } from "../componentes/Campo";
@@ -11,7 +10,7 @@ import { ETIQUETA_MONEDA } from "../utilidades/formato";
 
 type FormularioVehiculo = Omit<
   Vehiculo,
-  "id" | "activo" | "fecha_creacion" | "fecha_actualizacion"
+  "id" | "fecha_creacion" | "fecha_actualizacion"
 >;
 
 const VALOR_INICIAL: FormularioVehiculo = {
@@ -169,7 +168,7 @@ export function VehiculoFormulario() {
               required
             />
           </Campo>
-          <Campo etiqueta="Tipo" descripcion="Tipo de vehículo: sedán, SUV, hatchback, etc.">
+          <Campo etiqueta="Tipo" descripcion="Tipo de vehículo, sedán, SUV, hatchback, etc.">
             <input
               className="campo-entrada"
               placeholder="Sedán, SUV, etc."
@@ -191,7 +190,7 @@ export function VehiculoFormulario() {
               required
             />
           </Campo>
-          <Campo etiqueta="Moneda" descripcion="Moneda del precio del vehículo (Soles o Dólares). Define la moneda del crédito al simular.">
+          <Campo etiqueta="Moneda" descripcion="Moneda del precio del vehículo, soles o dólares. Define la moneda del crédito al simular.">
             <select
               className="campo-entrada"
               value={datos.moneda}

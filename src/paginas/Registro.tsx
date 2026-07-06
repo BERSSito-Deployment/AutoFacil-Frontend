@@ -1,4 +1,3 @@
-// Pagina de registro: tarjeta centrada y simple.
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mensaje } from "../componentes/Mensaje";

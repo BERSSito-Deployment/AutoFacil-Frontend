@@ -1,4 +1,3 @@
-// Contexto de autenticacion: gestiona el token, el perfil y el ciclo de sesion.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { CLAVE_TOKEN } from "../api/cliente";
@@ -22,7 +21,6 @@ export function ProveedorAutenticacion({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [cargando, setCargando] = useState(true);
 
-  // Al iniciar la aplicacion, si hay token se recupera el perfil del usuario.
   useEffect(() => {
     const token = localStorage.getItem(CLAVE_TOKEN);
     if (!token) {
@@ -77,7 +75,6 @@ export function ProveedorAutenticacion({ children }: { children: ReactNode }) {
   return <ContextoAutenticacion.Provider value={valor}>{children}</ContextoAutenticacion.Provider>;
 }
 
-// Hook de acceso al contexto de autenticacion.
 export function useAutenticacion(): ValorContextoAutenticacion {
   const contexto = useContext(ContextoAutenticacion);
   if (contexto === undefined) {

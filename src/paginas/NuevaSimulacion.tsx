@@ -1,4 +1,3 @@
-// Pagina para crear (o editar) una simulacion Compra Inteligente.
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Campo } from "../componentes/Campo";
@@ -47,8 +46,6 @@ interface FormularioSimulacion {
   porcentaje_cuota_final: number;
   meses_gracia_total: number;
   meses_gracia_parcial: number;
-  // Los montos y porcentajes opcionales se guardan como texto para que el campo
-  // acepte cualquier valor escrito (0, 0.049, vacio); se convierten al calcular.
   costo_notarial: string;
   costo_notarial_financiado: boolean;
   costo_registral: string;
@@ -115,7 +112,6 @@ const CAPITALIZACIONES: Capitalizacion[] = [
   "ANUAL",
 ];
 
-// Cuota final sugerida por cada plan (el personalizado conserva la que este puesta).
 const CUOTA_FINAL_POR_PLAN: Record<string, number> = { PLAN_24: 50, PLAN_36: 40 };
 
 type CampoMonto =
@@ -139,7 +135,6 @@ const CAMPOS_MONTO: CampoMonto[] = [
   "gastos_adm_periodico",
 ];
 
-// Muestra un numero guardado como texto de campo (vacio cuando es cero).
 function aTexto(valor: number): string {
   return valor === 0 ? "" : String(valor);
 }
@@ -163,7 +158,6 @@ function convertirTextoMonto(valor: string, factor: number): string {
   return aTextoMonto(numero * factor);
 }
 
-// Encabezado de paso con un numero en circulo, para guiar el formulario.
 function Paso({ numero, titulo }: { numero: number; titulo: string }) {
   return (
     <div className="flex items-center gap-2.5">
@@ -175,7 +169,6 @@ function Paso({ numero, titulo }: { numero: number; titulo: string }) {
   );
 }
 
-// Campo de un costo inicial: monto + modalidad (financiado al credito o al contado).
 function CostoInicialCampo({
   etiqueta,
   descripcion,
@@ -240,18 +233,12 @@ export function NuevaSimulacion() {
   const [calculando, setCalculando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
-  // La cuota inicial puede ingresarse como % del precio o como monto.
   const [modoCuotaInicial, setModoCuotaInicial] = useState<"porcentaje" | "monto">("porcentaje");
-  // Tipo de cambio referencial (1 USD = PEN), usado para convertir y mostrar equivalencias.
   const [tipoCambio, setTipoCambio] = useState<TipoCambio | null>(null);
 
-  // Vehiculos del usuario disponibles para simular.
-  const vehiculosActivos = useMemo(() => vehiculos.filter((v) => v.activo), [vehiculos]);
-
   useEffect(() => {
-    // Al editar se incluyen los vehiculos dados de baja para mostrar el de la
-    // simulacion historica aunque ya no este activo.
-    listarVehiculos(undefined, editando)
+
+    listarVehiculos()
       .then((listaVehiculos) => {
         setVehiculos(listaVehiculos);
         const vehiculoUrl = Number(parametrosUrl.get("vehiculo"));
@@ -268,7 +255,6 @@ export function NuevaSimulacion() {
       })
       .catch((err) => setError(mensajeError(err)))
       .finally(() => setCargandoListas(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -321,17 +307,6 @@ export function NuevaSimulacion() {
     [vehiculos, datos.vehiculo_id]
   );
 
-  // Opciones del desplegable: los vehiculos activos y, al editar, tambien el
-  // vehiculo de la simulacion aunque haya sido dado de baja.
-  const vehiculosOpciones = useMemo(() => {
-    if (vehiculoSeleccionado && !vehiculosActivos.some((v) => v.id === vehiculoSeleccionado.id)) {
-      return [vehiculoSeleccionado, ...vehiculosActivos];
-    }
-    return vehiculosActivos;
-  }, [vehiculoSeleccionado, vehiculosActivos]);
-
-  // La moneda del credito la elige el usuario y puede diferir de la del vehiculo:
-  // en ese caso el precio se convierte con el tipo de cambio.
   const monedaCredito = datos.moneda;
   const monedaVehiculo = vehiculoSeleccionado ? vehiculoSeleccionado.moneda : datos.moneda;
   const precioVehiculo = vehiculoSeleccionado ? vehiculoSeleccionado.precio : 0;
@@ -391,7 +366,6 @@ export function NuevaSimulacion() {
     }
   };
 
-  // Cualquier cambio de parametro invalida el resultado calculado previamente.
   const actualizar = (campo: keyof FormularioSimulacion, valor: string | number | boolean) => {
     setDatos((anterior) => ({ ...anterior, [campo]: valor }));
     setResultado(null);
@@ -474,8 +448,6 @@ export function NuevaSimulacion() {
     vehiculo_id: datos.vehiculo_id,
     nombre: datos.nombre.trim() || null,
     moneda: monedaCredito,
-    // El tipo de cambio siempre viaja: convierte el precio cuando las monedas
-    // difieren y sirve para mostrar equivalencias Soles/Dolares en el resultado.
     tipo_cambio_referencial: datos.tipo_cambio_referencial,
     plan: datos.plan,
     numero_cuotas: datos.plan === "PERSONALIZADO" ? datos.numero_cuotas : null,
@@ -542,7 +514,7 @@ export function NuevaSimulacion() {
               ...carga,
               actualizar_precio: datos.actualizar_precio,
             })
-          : await guardarSimulacion({ ...carga, estado: "CALCULADA" });
+          : await guardarSimulacion(carga);
       navegar(`/simulaciones/${simulacion.id}`);
     } catch (err) {
       setError(mensajeError(err, "No se pudo guardar la simulación."));
@@ -570,12 +542,6 @@ export function NuevaSimulacion() {
 
       <section className="tarjeta space-y-5 p-6">
         <Paso numero={1} titulo="Vehículo" />
-        {vehiculosActivos.length === 0 && (
-          <Mensaje tipo="info">
-            Necesitas al menos un vehículo. Agrégalo en la pantalla de inicio ("Mis vehículos") para
-            poder simular.
-          </Mensaje>
-        )}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Campo etiqueta="Vehículo" descripcion="Vehículo a financiar. Su precio es la base del cálculo.">
             <select
@@ -584,10 +550,9 @@ export function NuevaSimulacion() {
               onChange={(evento) => seleccionarVehiculo(Number(evento.target.value))}
             >
               <option value={0}>Seleccione un vehículo</option>
-              {vehiculosOpciones.map((vehiculo) => (
+              {vehiculos.map((vehiculo) => (
                 <option key={vehiculo.id} value={vehiculo.id}>
                   {vehiculo.marca} {vehiculo.modelo} - {formatoMoneda(vehiculo.precio, vehiculo.moneda)}
-                  {!vehiculo.activo ? " (dado de baja)" : ""}
                 </option>
               ))}
             </select>
@@ -639,7 +604,7 @@ export function NuevaSimulacion() {
       <section className="tarjeta space-y-5 p-6">
         <Paso numero={2} titulo="Condiciones del crédito" />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <Campo etiqueta="Moneda del crédito" descripcion="Moneda en la que se otorga el crédito. Puede ser distinta a la del vehículo: en ese caso el precio se convierte con el tipo de cambio que indiques.">
+          <Campo etiqueta="Moneda del crédito" descripcion="Moneda en la que se otorga el crédito. Puede ser distinta a la del vehículo, en ese caso el precio se convierte con el tipo de cambio que indiques.">
             <select
               className="campo-entrada"
               value={datos.moneda}
@@ -670,7 +635,7 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Plan de pagos"
             ayuda="Cuota balon"
-            descripcion="Plan 24: 24 cuotas (cuota final sugerida 50%). Plan 36: 36 cuotas (sugerida 40%). Personalizado: tú eliges los meses. Al cambiar a Plan 24 o 36 la cuota final vuelve a la sugerida, pero puedes editarla."
+            descripcion="Plan 24, 24 cuotas y cuota final sugerida de cincuenta por ciento. Plan 36, 36 cuotas y cuota final sugerida de cuarenta por ciento. Personalizado, tú eliges los meses. Al cambiar a Plan 24 o 36 la cuota final vuelve a la sugerida, pero puedes editarla."
           >
             <select
               className="campo-entrada"
@@ -680,8 +645,6 @@ export function NuevaSimulacion() {
                 setDatos((anterior) => ({
                   ...anterior,
                   plan: nuevoPlan,
-                  // Plan 24/36 traen su cuota final sugerida; el personalizado
-                  // respeta la que el usuario tenga puesta.
                   porcentaje_cuota_final:
                     CUOTA_FINAL_POR_PLAN[nuevoPlan] ?? anterior.porcentaje_cuota_final,
                 }));
@@ -727,7 +690,7 @@ export function NuevaSimulacion() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <Campo etiqueta="Capitalización" ayuda="Capitalizacion" descripcion="Frecuencia de capitalización de la tasa nominal. Solo aplica si la tasa es nominal (TNA).">
+          <Campo etiqueta="Capitalización" ayuda="Capitalizacion" descripcion="Frecuencia de capitalización de la tasa nominal. Solo aplica si la tasa es nominal, TNA.">
             <select
               className="campo-entrada"
               value={datos.capitalizacion}
@@ -746,7 +709,7 @@ export function NuevaSimulacion() {
           </Campo>
           <Campo
             etiqueta="Días por año"
-            descripcion="Base para convertir las tasas: año ordinario de 360 días (12 cuotas exactas al año) o año natural de 365 días."
+            descripcion="Base para convertir las tasas, año ordinario de 360 días o año natural de 365 días."
           >
             <select
               className="campo-entrada"
@@ -832,7 +795,7 @@ export function NuevaSimulacion() {
         )}
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Cuota inicial: se puede ingresar como porcentaje o como monto. */}
+          {}
           <Campo
             etiqueta="Cuota inicial"
             ayuda="Cuota inicial"
@@ -894,12 +857,11 @@ export function NuevaSimulacion() {
             </p>
           </Campo>
 
-          {/* Cuota final: parte del precio que se deja para el final. Editable;
-              se sugiere 40% en Plan 36 y 50% en Plan 24. */}
+          {}
           <Campo
             etiqueta="Cuota final (%)"
             ayuda="Cuota balon"
-            descripcion="Parte del precio que se difiere y se paga al final del crédito. Por defecto la define el plan (40% en Plan 36, 50% en Plan 24), pero puedes cambiarla."
+            descripcion="Parte del precio que se difiere y se paga al final del crédito. Por defecto la define el plan, cuarenta por ciento en Plan 36 y cincuenta por ciento en Plan 24, pero puedes cambiarla."
           >
             <input
               className="campo-entrada"
@@ -922,7 +884,7 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Meses de gracia total"
             ayuda="Gracia total"
-            descripcion="Meses iniciales en los que no se paga capital ni intereses (los intereses se capitalizan). Los cargos sí se cobran."
+            descripcion="Meses iniciales en los que no se paga capital ni intereses. Los intereses se capitalizan. Los cargos sí se cobran."
           >
             <input
               className="campo-entrada"
@@ -935,7 +897,7 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Meses de gracia parcial"
             ayuda="Gracia parcial"
-            descripcion="Meses (a continuación de la gracia total) en los que solo se paga el interés; no se amortiza capital."
+            descripcion="Meses a continuación de la gracia total en los que solo se paga el interés, no se amortiza capital."
           >
             <input
               className="campo-entrada"
@@ -951,7 +913,7 @@ export function NuevaSimulacion() {
       <section className="tarjeta space-y-5 p-6">
         <Paso numero={3} titulo="Seguros y costos" />
 
-        {/* Seguros. Son PORCENTAJES, no montos. */}
+        {}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Campo
             etiqueta="Seguro de desgravamen (% mensual)"
@@ -996,7 +958,7 @@ export function NuevaSimulacion() {
           </Campo>
         </div>
 
-        {/* Costos periodicos por cuota. */}
+        {}
         <div className="border-t border-slate-200 pt-5">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Costos periódicos (monto por cada cuota)
@@ -1056,7 +1018,7 @@ export function NuevaSimulacion() {
           </div>
         </div>
 
-        {/* Costos / gastos iniciales con modalidad. */}
+        { }
         <div className="border-t border-slate-200 pt-5">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Costos / gastos iniciales
@@ -1077,7 +1039,7 @@ export function NuevaSimulacion() {
             />
             <CostoInicialCampo
               etiqueta="Gastos registrales"
-              descripcion="Gastos de inscripción en registros públicos (incluye la prenda vehicular)."
+              descripcion="Gastos de inscripción en registros públicos, incluye la prenda vehicular."
               monto={datos.costo_registral}
               financiado={datos.costo_registral_financiado}
               onMonto={(v) => actualizar("costo_registral", v)}

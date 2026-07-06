@@ -1,6 +1,3 @@
-// Tipos compartidos que reflejan los esquemas y enumeraciones del backend.
-// Las tasas y porcentajes viajan en formato decimal (0.18 = 18%).
-
 export type Moneda = "PEN" | "USD";
 export type TipoTasa = "EFECTIVA" | "NOMINAL";
 export type Capitalizacion =
@@ -13,7 +10,6 @@ export type Capitalizacion =
   | "SEMESTRAL"
   | "ANUAL";
 export type Plan = "PLAN_24" | "PLAN_36" | "PERSONALIZADO";
-export type EstadoSimulacion = "CALCULADA" | "ARCHIVADA";
 export type TipoPeriodo =
   | "GRACIA_TOTAL"
   | "GRACIA_PARCIAL"
@@ -25,7 +21,6 @@ export interface Usuario {
   nombre: string;
   apellido: string;
   correo: string;
-  activo: boolean;
   fecha_creacion: string;
   fecha_actualizacion: string;
 }
@@ -41,7 +36,6 @@ export interface Vehiculo {
   moneda: Moneda;
   descripcion?: string | null;
   url_imagen?: string | null;
-  activo: boolean;
   fecha_creacion: string;
   fecha_actualizacion: string;
 }
@@ -54,18 +48,17 @@ export interface TipoCambio {
   en_linea: boolean;
 }
 
-// Fila del cronograma: tramo de la cuota final, tramo regular y flujo.
 export interface FilaCronograma {
   numero_periodo: number;
   fecha_pago: string;
   tipo_periodo: TipoPeriodo;
-  // Tramo de la cuota final.
+  // cuota final
   saldo_inicial_cuota_final: number;
   interes_cuota_final: number;
   amortizacion_cuota_final: number;
   desgravamen_cuota_final: number;
   saldo_final_cuota_final: number;
-  // Tramo regular.
+  // cuota regular
   saldo_inicial: number;
   interes: number;
   cuota: number;
@@ -132,9 +125,8 @@ export interface ParametrosSimulacion {
   moneda: Moneda;
   tipo_cambio_referencial?: number | null;
   plan: Plan;
-  // Meses del credito cuando el plan es personalizado.
+  // meses del credito cuando el plan es personalizado
   numero_cuotas?: number | null;
-  // 360 (año ordinario) o 365 (año natural).
   dias_anio: number;
   porcentaje_cuota_inicial: number;
   porcentaje_cuota_final: number;
@@ -163,8 +155,7 @@ export interface ParametrosSimulacion {
 }
 
 export interface SimulacionGuardar extends ParametrosSimulacion {
-  estado?: EstadoSimulacion;
-  // Al editar: actualizar al precio actual del vehiculo (por defecto conserva el original).
+  // al editar se puede actualizar al precio actual del vehiculo si es que se ha cambiado
   actualizar_precio?: boolean;
 }
 
@@ -174,10 +165,9 @@ export interface Simulacion extends Indicadores {
   nombre?: string | null;
   vehiculo_id: number;
   usuario_id: number;
-  estado: EstadoSimulacion;
   tipo_cambio_referencial?: number | null;
   fecha_inicio: string;
-  // Costos / gastos iniciales (monto + modalidad).
+  // costos extra
   costo_notarial: number;
   costo_notarial_financiado: boolean;
   costo_registral: number;
@@ -199,7 +189,6 @@ export interface SimulacionListado {
   id: number;
   codigo: string;
   nombre?: string | null;
-  estado: EstadoSimulacion;
   moneda: Moneda;
   plan: Plan;
   vehiculo_id: number;
@@ -207,7 +196,7 @@ export interface SimulacionListado {
   monto_prestamo: number;
   numero_cuotas: number;
   cuota_mensual: number;
-  // Cuota + seguros y cargos del mes (lo que realmente se paga).
+  // cuota + seguros y cargos del mes
   pago_mensual: number;
   tcea: number | null;
   fecha_creacion: string;

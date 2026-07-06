@@ -1,4 +1,3 @@
-// Ayuda emergente para terminos tecnicos.
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { GLOSARIO } from "../utilidades/glosario";
@@ -19,7 +18,6 @@ export function AyudaTooltip({ termino, texto }: PropiedadesAyuda) {
   const refBoton = useRef<HTMLButtonElement>(null);
   const explicacion = texto ?? GLOSARIO[termino] ?? "Sin descripcion disponible.";
 
-  // Calcula la posicion del boton para ubicar el popup.
   const mostrar = () => {
     const caja = refBoton.current?.getBoundingClientRect();
     if (!caja) {
@@ -32,7 +30,6 @@ export function AyudaTooltip({ termino, texto }: PropiedadesAyuda) {
 
   const ocultar = () => setPosicion(null);
 
-  // Si el boton esta muy arriba, el popup va debajo; si no, va encima.
   const haciaAbajo = posicion ? posicion.top < 160 : false;
 
   return (
