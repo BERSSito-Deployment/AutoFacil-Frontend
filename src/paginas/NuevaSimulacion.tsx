@@ -542,12 +542,6 @@ export function NuevaSimulacion() {
 
       <section className="tarjeta space-y-5 p-6">
         <Paso numero={1} titulo="Vehículo" />
-        {vehiculos.length === 0 && (
-          <Mensaje tipo="info">
-            Necesitas al menos un vehículo. Agrégalo en la pantalla de inicio ("Mis vehículos") para
-            poder simular.
-          </Mensaje>
-        )}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Campo etiqueta="Vehículo" descripcion="Vehículo a financiar. Su precio es la base del cálculo.">
             <select
@@ -610,7 +604,7 @@ export function NuevaSimulacion() {
       <section className="tarjeta space-y-5 p-6">
         <Paso numero={2} titulo="Condiciones del crédito" />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <Campo etiqueta="Moneda del crédito" descripcion="Moneda en la que se otorga el crédito. Puede ser distinta a la del vehículo: en ese caso el precio se convierte con el tipo de cambio que indiques.">
+          <Campo etiqueta="Moneda del crédito" descripcion="Moneda en la que se otorga el crédito. Puede ser distinta a la del vehículo, en ese caso el precio se convierte con el tipo de cambio que indiques.">
             <select
               className="campo-entrada"
               value={datos.moneda}
@@ -641,7 +635,7 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Plan de pagos"
             ayuda="Cuota balon"
-            descripcion="Plan 24: 24 cuotas (cuota final sugerida 50%). Plan 36: 36 cuotas (sugerida 40%). Personalizado: tú eliges los meses. Al cambiar a Plan 24 o 36 la cuota final vuelve a la sugerida, pero puedes editarla."
+            descripcion="Plan 24, 24 cuotas y cuota final sugerida de cincuenta por ciento. Plan 36, 36 cuotas y cuota final sugerida de cuarenta por ciento. Personalizado, tú eliges los meses. Al cambiar a Plan 24 o 36 la cuota final vuelve a la sugerida, pero puedes editarla."
           >
             <select
               className="campo-entrada"
@@ -696,7 +690,7 @@ export function NuevaSimulacion() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <Campo etiqueta="Capitalización" ayuda="Capitalizacion" descripcion="Frecuencia de capitalización de la tasa nominal. Solo aplica si la tasa es nominal (TNA).">
+          <Campo etiqueta="Capitalización" ayuda="Capitalizacion" descripcion="Frecuencia de capitalización de la tasa nominal. Solo aplica si la tasa es nominal, TNA.">
             <select
               className="campo-entrada"
               value={datos.capitalizacion}
@@ -715,7 +709,7 @@ export function NuevaSimulacion() {
           </Campo>
           <Campo
             etiqueta="Días por año"
-            descripcion="Base para convertir las tasas: año ordinario de 360 días (12 cuotas exactas al año) o año natural de 365 días."
+            descripcion="Base para convertir las tasas, año ordinario de 360 días o año natural de 365 días."
           >
             <select
               className="campo-entrada"
@@ -867,7 +861,7 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Cuota final (%)"
             ayuda="Cuota balon"
-            descripcion="Parte del precio que se difiere y se paga al final del crédito. Por defecto la define el plan (40% en Plan 36, 50% en Plan 24), pero puedes cambiarla."
+            descripcion="Parte del precio que se difiere y se paga al final del crédito. Por defecto la define el plan, cuarenta por ciento en Plan 36 y cincuenta por ciento en Plan 24, pero puedes cambiarla."
           >
             <input
               className="campo-entrada"
@@ -890,7 +884,7 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Meses de gracia total"
             ayuda="Gracia total"
-            descripcion="Meses iniciales en los que no se paga capital ni intereses (los intereses se capitalizan). Los cargos sí se cobran."
+            descripcion="Meses iniciales en los que no se paga capital ni intereses. Los intereses se capitalizan. Los cargos sí se cobran."
           >
             <input
               className="campo-entrada"
@@ -903,7 +897,7 @@ export function NuevaSimulacion() {
           <Campo
             etiqueta="Meses de gracia parcial"
             ayuda="Gracia parcial"
-            descripcion="Meses (a continuación de la gracia total) en los que solo se paga el interés; no se amortiza capital."
+            descripcion="Meses a continuación de la gracia total en los que solo se paga el interés, no se amortiza capital."
           >
             <input
               className="campo-entrada"
@@ -1045,7 +1039,7 @@ export function NuevaSimulacion() {
             />
             <CostoInicialCampo
               etiqueta="Gastos registrales"
-              descripcion="Gastos de inscripción en registros públicos (incluye la prenda vehicular)."
+              descripcion="Gastos de inscripción en registros públicos, incluye la prenda vehicular."
               monto={datos.costo_registral}
               financiado={datos.costo_registral_financiado}
               onMonto={(v) => actualizar("costo_registral", v)}

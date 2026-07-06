@@ -228,7 +228,7 @@ export function ResultadosSimulacion({ indicadores, cronograma, tipoCambio }: Pr
         <Indicador
           titulo="Tasa de descuento (COKi)"
           valor={formatoPorcentaje(indicadores.cok_mensual)}
-          ayuda="COK"
+          ayuda="COKi"
         />
         <Indicador titulo="VAN" valor={formatoMoneda(indicadores.van, moneda)} ayuda="VAN" />
         <Indicador titulo="TIR" valor={formatoPorcentaje(indicadores.tir_mensual)} ayuda="TIR" />

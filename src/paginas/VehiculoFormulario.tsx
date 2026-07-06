@@ -168,7 +168,7 @@ export function VehiculoFormulario() {
               required
             />
           </Campo>
-          <Campo etiqueta="Tipo" descripcion="Tipo de vehículo: sedán, SUV, hatchback, etc.">
+          <Campo etiqueta="Tipo" descripcion="Tipo de vehículo, sedán, SUV, hatchback, etc.">
             <input
               className="campo-entrada"
               placeholder="Sedán, SUV, etc."
@@ -190,7 +190,7 @@ export function VehiculoFormulario() {
               required
             />
           </Campo>
-          <Campo etiqueta="Moneda" descripcion="Moneda del precio del vehículo (Soles o Dólares). Define la moneda del crédito al simular.">
+          <Campo etiqueta="Moneda" descripcion="Moneda del precio del vehículo, soles o dólares. Define la moneda del crédito al simular.">
             <select
               className="campo-entrada"
               value={datos.moneda}
